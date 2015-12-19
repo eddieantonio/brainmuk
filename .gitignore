@@ -1,0 +1,12 @@
+# Object files
+*.o
+
+# Include files
+*.d
+
+# Debug files
+core
+*.dSYM/
+
+# Exectuables
+brainmuk
