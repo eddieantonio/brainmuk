@@ -3,11 +3,37 @@
 
 #include "greatest.h"
 
+#include <brainmuk.h>
 #include <bf_alloc.h>
 #include <bf_slurp.h>
 
 static const uint8_t X86_RET = 0xC3;
 static const uint8_t X86_NOP = 0x90;
+
+/*********************** tests for parse_arguments() ***********************/
+
+#define KIBIBYES    (1024)
+#define MIBIBYTES   (1024 * KIBIBYES)
+#define GIBIBYTES   (1024 * GIBIBYTES)
+
+TEST parses_unsuffixed_minimum_size() {
+    /** Assumes megabytes by default. */
+    bf_options options = parse_arguments(2, (char *[]) {
+            "brainmuk", "-m128", NULL
+    });
+
+    ASSERT_EQ_FMTm("-m128",
+            128 * MIBIBYTES, options.minimum_universe_size, "%u");
+
+    options = parse_arguments(2, (char *[]) {
+            "brainmuk", "--minimum-universe=128", NULL
+    });
+
+    ASSERT_EQ_FMTm("--minimum-universe=128",
+            128 * MIBIBYTES, options.minimum_universe_size, "%u");
+
+    PASS();
+}
 
 /********************* tests for slurp() and unslurp() *********************/
 
@@ -80,6 +106,8 @@ GREATEST_MAIN_DEFS();
 
 int main(int argc, char **argv) {
     GREATEST_MAIN_BEGIN();      /* command-line arguments, initialization. */
+
+    RUN_TEST(parses_unsuffixed_minimum_size);
 
     RUN_TEST(space_returned_can_be_executed_and_freed);
     RUN_TEST(space_returned_is_given_size);

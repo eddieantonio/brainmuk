@@ -21,6 +21,9 @@ uint8_t *allocate_executable_space(size_t size) {
     return memory;
 }
 
+/* TODO: fairly certain this will lead to a memory leak if the mapping is
+ * larger than the page size... */
+
 bool free_executable_space(uint8_t *space) {
     if (munmap(space, 1) == 0) {
         return true;
