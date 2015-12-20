@@ -8,6 +8,15 @@ CPPFLAGS := -I$(LOCAL_INCLUDE_DIR) $(CPPFLAGS)
 # Create .d for each .o file.
 CPP_ADD_DEFINES = -MMD
 
+# The shell command to rerun.
+WATCH_COMMAND = make test
+# I like to use this in iTerm 2:
+#
+# 	make watch WATCH_COMMAND='printf "\e]50;ClearScrollback\a"; make test'
+#
+# It clears scrollback when ever make test is rerun; makes isolating compile
+# errors and the latest test failures quite easy.
+
 NAME = brainmuk
 VERSION = 0.1.0
 
@@ -31,15 +40,15 @@ clean:
 
 dist: $(DISTNAME).tar.gz
 
-test: tests/brainmuk_tests
+test: $(TESTBIN)
 	./$<
 
+# Requires rerun <https://github.com/alexch/rerun> to be installed.
 watch:
-	# Requires rerun <https://github.com/alexch/rerun> to be installed.
 	@if hash rerun ; \
 		then exit 0; \
 		else echo "Requires rerun:\n\t$$ gem install rerun"; exit -1; fi
-	-rerun -cxp '**/*.{c,h}' -- make test
+	-rerun --exit --clear --pattern '**/*.{c,h}' -- '$(WATCH_COMMAND)'
 
 ### Actual targets! ###
 
