@@ -29,34 +29,43 @@ static const uint8_t full_function[] = {
 };
 #endif
 
+/* Conventions:
+ *
+ *  %rbx:
+ *      contains uint8_t *p.
+ *  0x10(%ebp):
+ *      contains uint8_t *universe
+ *  -0x10(%ebp):
+ *      contains save space for %rbx
+ */
 static const uint8_t function_prologue[] = {
     /* Set up our stack frame... */
     0x55,                   // pushq    %rbp
     0x48, 0x89, 0xe5,       // movq     %rsp, %rbp
+    /* Add 16 bytes of scratch space (need to be 16 byte-aligned). */
+    0x48, 0x83, 0xec, 0x10, // subq     $0x10, %rsp
 
-    /* TODO: establish a convention for register usage. */
-    /* De facto: %rax contains uint8_t *p. */
-
-    /* Load address of... universe address into %eax. */
+    /* $rbx = (uint8_t *) universe */
     0x48, 0x8d, 0x45, 0x10, // leaq     0x10(%rbp), %rax
     /* %rax = p */
-    0x48, 0x8b, 0x00,       // movq     (%rax), %rax
+    0x48, 0x8b, 0x18,       // movq     (%rax), %rbx
 };
 
 static const uint8_t function_epilogue[] = {
     /* Relinquish our stack frame. */
+    0x48, 0x83, 0xc4, 0x10, // addq     $0x10, %rsp
     0x5d,                   // popq     %rbp
     0xc3,                   // retq
 };
 
 static const uint8_t increment_memory[] = {
     /* (*p)++ */
-    0xfe, 0x00              // incb (%rax)
+    0xfe, 0x03              // incb (%rax)
 };
 
 static const uint8_t decrement_memory[] = {
     /* (*p)-- */
-    0xfe, 0x08              // decb (%rax)
+    0xfe, 0x0b              // decb (%rax)
 };
 
 /**
