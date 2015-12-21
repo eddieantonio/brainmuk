@@ -1,11 +1,13 @@
 #ifndef BRAINMUK_H
 #define BRAINMUK_H
 
+#include <stddef.h>
+
 typedef struct {
     /**
      * Mimimum size of the universe in bytes.
      */
-    unsigned int minimum_universe_size;
+    size_t minimum_universe_size;
 } bf_options;
 
 /**

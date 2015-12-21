@@ -7,30 +7,45 @@
 #include <bf_alloc.h>
 #include <bf_slurp.h>
 
-static const uint8_t X86_RET = 0xC3;
-static const uint8_t X86_NOP = 0x90;
-
 /*********************** tests for parse_arguments() ***********************/
 
-#define KIBIBYES    (1024)
-#define MIBIBYTES   (1024 * KIBIBYES)
-#define GIBIBYTES   (1024 * GIBIBYTES)
+#define KIBIBYTES(x)    ((size_t) (x) * (size_t) 1024)
+#define MIBIBYTES(x)    ((size_t) (x) * KIBIBYTES(1024))
+#define GIBIBYTES(x)    ((size_t) (x) * MIBIBYTES(1024))
 
 TEST parses_unsuffixed_minimum_size() {
-    /** Assumes megabytes by default. */
+    /* Assumes megabytes by default. */
     bf_options options = parse_arguments(2, (char *[]) {
             "brainmuk", "-m128", NULL
     });
 
     ASSERT_EQ_FMTm("-m128",
-            128 * MIBIBYTES, options.minimum_universe_size, "%u");
+            MIBIBYTES(128), options.minimum_universe_size, "%lu");
 
     options = parse_arguments(2, (char *[]) {
             "brainmuk", "--minimum-universe=128", NULL
     });
 
     ASSERT_EQ_FMTm("--minimum-universe=128",
-            128 * MIBIBYTES, options.minimum_universe_size, "%u");
+            MIBIBYTES(128), options.minimum_universe_size, "%lu");
+
+    PASS();
+}
+
+TEST parses_suffixed_minimum_size() {
+    bf_options options = parse_arguments(2, (char *[]) {
+            "brainmuk", "-m4g", NULL
+    });
+
+    ASSERT_EQ_FMTm("-m4g",
+            GIBIBYTES(4), options.minimum_universe_size, "%lu");
+
+    options = parse_arguments(2, (char *[]) {
+            "brainmuk", "--minimum-universe=64kb", NULL
+    });
+
+    ASSERT_EQ_FMTm("--minimum-universe=64k",
+            KIBIBYTES(64), options.minimum_universe_size, "%lu");
 
     PASS();
 }
@@ -44,8 +59,7 @@ TEST normal_file_can_be_slurped_and_unslurped() {
     ASSERTm("Could not slurp file: " test_filename , str != NULL);
 
     ASSERT_STR_EQm("Unexpected file contents for " test_filename,
-           "Hi, I'm a normal file.\n",
-           str);
+           "Hi, I'm a normal file.\n", str);
 
     ASSERTm("Could not unslurp " test_filename, unslurp(str));
 
@@ -54,6 +68,9 @@ TEST normal_file_can_be_slurped_and_unslurped() {
 }
 
 /******************* tests for allocate_executable_space *******************/
+
+static const uint8_t X86_RET = 0xC3;
+static const uint8_t X86_NOP = 0x90;
 
 TEST space_returned_can_be_executed_and_freed(void) {
     uint8_t* space = allocate_executable_space(1);
@@ -108,6 +125,7 @@ int main(int argc, char **argv) {
     GREATEST_MAIN_BEGIN();      /* command-line arguments, initialization. */
 
     RUN_TEST(parses_unsuffixed_minimum_size);
+    RUN_TEST(parses_suffixed_minimum_size);
 
     RUN_TEST(space_returned_can_be_executed_and_freed);
     RUN_TEST(space_returned_is_given_size);
