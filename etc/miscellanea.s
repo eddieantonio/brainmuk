@@ -93,3 +93,24 @@ call_input:
     # *p = %al
     movb    %al, (%rbx)
 
+
+.global loop_skeleton
+loop_skeleton:
+    # Top of the loop
+
+    # %cl = *p
+    movb    (%rbx), %cl
+    
+    # if == 0, skip...
+    cmpb    $0x0, %cl
+    # Placeholder is 0xFFFFFFFF
+    je      -0x1
+
+    # loop body
+    nop
+
+    jmp -0x1
+
+    # After.
+    nop
+

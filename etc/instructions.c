@@ -31,7 +31,7 @@ void bf_sub_addr(struct bf_runtime_context context) {
 void bf_loop(struct bf_runtime_context context) {
     volatile uint8_t *p = context.universe;
     while (*p) {
-        *p = '0';
+        *p = 0;
     }
 }
 
