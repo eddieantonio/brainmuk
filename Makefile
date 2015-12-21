@@ -17,6 +17,10 @@ WATCH_COMMAND = make test
 # It clears scrollback when ever make test is rerun; makes isolating compile
 # errors and the latest test failures quite easy.
 
+# Options directed to the test launcher.
+# Useful is -v -s [suite]
+TEST_OPTIONS =
+
 NAME = brainmuk
 VERSION = 0.1.0
 
@@ -41,7 +45,7 @@ clean:
 dist: $(DISTNAME).tar.gz
 
 test: $(TESTBIN)
-	./$<
+	./$< $(TEST_OPTIONS)
 
 # Requires rerun <https://github.com/alexch/rerun> to be installed.
 watch:
