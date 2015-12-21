@@ -52,9 +52,67 @@ TEST parses_suffixed_minimum_size() {
     PASS();
 }
 
+TEST parses_filename() {
+    /* Only filename; no other arguments. */
+    bf_options options = parse_arguments(2, (char *[]) {
+            "brainmuk", "hi.bf", NULL
+    });
+    ASSERT_FALSEm("got null for filename", options.filename == NULL);
+    ASSERT_STR_EQm("Unexpected filename", "hi.bf", options.filename);
+
+    /* Flags, and then other filename. */
+    options = parse_arguments(3, (char *[]) {
+            "brainmuk", "-m4g", "hello.bf", NULL
+    });
+    ASSERT_FALSEm("got null for filename", options.filename == NULL);
+    ASSERT_STR_EQm("Unexpected filename", "hello.bf", options.filename);
+
+    /* Filename, and then flags. */
+    options = parse_arguments(3, (char *[]) {
+            "brainmuk", "heya.bf", "-m4g", NULL
+    });
+    ASSERT_FALSEm("got null for filename", options.filename == NULL);
+    ASSERT_STR_EQm("Unexpected filename", "heya.bf", options.filename);
+
+    /* Two-part arugments, then filename. */
+    options = parse_arguments(4, (char *[]) {
+            "brainmuk", "-m", "4gb", "heya.bf",  NULL
+    });
+    ASSERT_FALSEm("got null for filename", options.filename == NULL);
+    ASSERT_STR_EQm("Unexpected filename", "heya.bf", options.filename);
+
+    /* Two filenames -- take the first */
+    options = parse_arguments(3, (char *[]) {
+            "brainmuk", "foo.bf", "bar.bf", NULL
+    });
+    ASSERT_FALSEm("got null for filename", options.filename == NULL);
+    ASSERT_STR_EQm("Unexpected filename", "foo.bf", options.filename);
+
+    PASS();
+}
+
+TEST parses_absence_of_filename() {
+    bf_options options = parse_arguments(1, (char *[]) {
+            "brainmuk", NULL
+    });
+
+    ASSERT(options.filename == NULL);
+
+    options = parse_arguments(2, (char *[]) {
+            "brainmuk", "-m4g",  NULL
+    });
+
+    ASSERT(options.filename == NULL);
+
+    PASS();
+}
+
+
 SUITE(argument_parsing_suite) {
     RUN_TEST(parses_unsuffixed_minimum_size);
     RUN_TEST(parses_suffixed_minimum_size);
+    RUN_TEST(parses_filename);
+    RUN_TEST(parses_absence_of_filename);
 }
 
 /********************* tests for slurp() and unslurp() *********************/

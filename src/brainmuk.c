@@ -83,7 +83,8 @@ static size_t parse_size(const char *str) {
 
 bf_options parse_arguments(int argc, char **argv) {
     bf_options parameters = {
-        .minimum_universe_size = 640 * 1024 /* ought to be enough for anybody. */
+        .minimum_universe_size = 640 * 1024, /* ought to be enough for anybody. */
+        .filename = NULL
     };
 
     static const struct option longopts[] = {
@@ -109,8 +110,6 @@ bf_options parse_arguments(int argc, char **argv) {
     };
     int option = -1;
 
-    /* RESET GLOBAL STATE! Yeah, getopt_long() works with globals... */
-    optind = 0;
 
     while ((option = getopt_long(argc, argv, "hm:v", longopts, NULL)) != -1) {
         switch (option) {
@@ -138,6 +137,14 @@ bf_options parse_arguments(int argc, char **argv) {
                 usage_error(argv[0]);
         }
     }
+
+    /* If we have arguments left-over. */
+    if (optind < argc) {
+        parameters.filename = argv[optind];
+    }
+
+    /* RESET GLOBAL STATE! Yeah, getopt_long() works with globals... */
+    optind = 0;
 
     return parameters;
 }

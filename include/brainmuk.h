@@ -8,6 +8,7 @@ typedef struct {
      * Mimimum size of the universe in bytes.
      */
     size_t minimum_universe_size;
+    char *filename;
 } bf_options;
 
 /**
