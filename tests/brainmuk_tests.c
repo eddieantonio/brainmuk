@@ -291,7 +291,6 @@ TEST compiles_output() {
             (uint8_t *) result.program, memory);
 
     result.program((struct bf_runtime_context) {
-        /* NOTE! **Intentionally** offset the universe by one! */
         .universe = universe,
         .output_byte = dummy_output,
     });
@@ -302,9 +301,9 @@ TEST compiles_output() {
     PASS();
 }
 
-#define CORRECT_INPUT 42
+#define DETERMINISTIC_INPUT 42
 static char dummy_input(void) {
-    return CORRECT_INPUT;
+    return DETERMINISTIC_INPUT;
 }
 
 TEST compiles_input() {
@@ -316,7 +315,6 @@ TEST compiles_input() {
             (uint8_t *) result.program, memory);
 
     result.program((struct bf_runtime_context) {
-        /* NOTE! **Intentionally** offset the universe by one! */
         .universe = universe,
         .input_byte = dummy_input,
     });
@@ -324,12 +322,33 @@ TEST compiles_input() {
     ASSERT_FALSEm("Input never called on correct address",
             universe[1] == 3);
     ASSERT_EQ_FMTm("Unexected value input",
-            CORRECT_INPUT, universe[1], "%hhu");
+            DETERMINISTIC_INPUT, universe[1], "%hhu");
 
     PASS();
 }
 
+TEST compiles_branch_instructions() {
+    output = NOT_WRITTEN;
 
+    /* A branch on zero will skip what's inside. */
+    bf_compile_result result = bf_compile("[,.]>+", memory);
+    ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
+    ASSERT_EQm("Unexpected start address",
+            (uint8_t *) result.program, memory);
+
+    result.program((struct bf_runtime_context) {
+        .universe = universe,
+        .output_byte = dummy_output,
+        .input_byte = dummy_input,
+    });
+
+    /* Checks if either input or output were called. */
+    ASSERT_FALSEm("Failed to skip input", universe[0] == DETERMINISTIC_INPUT);
+    ASSERTm("Failed to skip output", output == NOT_WRITTEN);
+    ASSERT_EQ_FMTm("Failed to jump to end", 1, universe[1], "%hhu");
+
+    PASS();
+}
 
 SUITE(compile_suite) {
     GREATEST_SET_SETUP_CB(setup_compile, NULL);
@@ -341,6 +360,7 @@ SUITE(compile_suite) {
     RUN_TEST(compiles_address_decrement);
     RUN_TEST(compiles_output);
     RUN_TEST(compiles_input);
+    RUN_TEST(compiles_branch_instructions);
 }
 
 
