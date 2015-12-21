@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -133,16 +134,28 @@ SUITE(allocate_executable_suite) {
 
 /*************************** tests for compile() ***************************/
 
-TEST compiles_simple_addition() {
-    uint8_t universe[256];
+static uint8_t universe[256] = { 0 };
+static uint8_t *memory = NULL;
+
+/* Zeros the universe and allocates fresh executable memory. */
+static void setup_compile(void *data) {
     memset(universe, 0, sizeof(universe));
+    assert(memory == NULL && "(uint_8 *) memory in unexpected state");
 
-    uint8_t *memory = allocate_executable_space(getpagesize() - 1);
-    ASSERT_FALSEm("Failed to allocate executable space", memory == NULL);
+    memory = allocate_executable_space(getpagesize() - 1);
+    assert(memory != NULL && "Failed to allocate executable space");
+}
 
+/* Deallocates the executable space. */
+static void teardown_compile(void *data) {
+    assert(free_executable_space(memory) && "Could not free space");
+    memory = NULL;
+}
+
+TEST compiles_simple_addition() {
     bf_compile_result result = bf_compile("+", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
-    ASSERT_EQm("Unexpected program location",
+    ASSERT_EQm("Unexpected start address",
             (uint8_t *) result.program, memory);
 
     result.program((struct bf_runtime_context) {
@@ -153,21 +166,13 @@ TEST compiles_simple_addition() {
 
     ASSERT_EQ_FMTm("+ did not increment data", 1, universe[0], "%hhu");
 
-    ASSERTm("Could not free space", free_executable_space(memory));
-
     PASS();
 }
 
 TEST compiles_simple_subtraction() {
-    uint8_t universe[256];
-    memset(universe, 0, sizeof(universe));
-
-    uint8_t *memory = allocate_executable_space(getpagesize() - 1);
-    ASSERT_FALSEm("Failed to allocate executable space", memory == NULL);
-
     bf_compile_result result = bf_compile("-", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
-    ASSERT_EQm("Unexpected program location",
+    ASSERT_EQm("Unexpected start address",
             (uint8_t *) result.program, memory);
 
     result.program((struct bf_runtime_context) {
@@ -178,12 +183,13 @@ TEST compiles_simple_subtraction() {
 
     ASSERT_EQ_FMTm("- did not decrement data", 0xFF, universe[0], "%hhu");
 
-    ASSERTm("Could not free space", free_executable_space(memory));
-
     PASS();
 }
 
 SUITE(compile_suite) {
+    GREATEST_SET_SETUP_CB(setup_compile, NULL);
+    GREATEST_SET_TEARDOWN_CB(teardown_compile, NULL);
+
     RUN_TEST(compiles_simple_addition);
     RUN_TEST(compiles_simple_subtraction);
 }
