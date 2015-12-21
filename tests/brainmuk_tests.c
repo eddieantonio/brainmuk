@@ -226,7 +226,7 @@ static void dummy_output(char octet) {
 TEST compiles_output() {
     output = NOT_WRITTEN;
 
-    /* Shuffle the data pointer around to ensure output works abides. */
+    /* Shuffle the data pointer around to ensure output abides. */
     bf_compile_result result = bf_compile(">+++<>.", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
     ASSERT_EQm("Unexpected start address",
@@ -244,6 +244,35 @@ TEST compiles_output() {
     PASS();
 }
 
+#define CORRECT_INPUT 42
+static char dummy_input(void) {
+    return CORRECT_INPUT;
+}
+
+TEST compiles_input() {
+    /* Shuffle the data pointer around to ensure input abides; change its
+     * data too to check if input actually worked... */
+    bf_compile_result result = bf_compile(">+++<>,", memory);
+    ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
+    ASSERT_EQm("Unexpected start address",
+            (uint8_t *) result.program, memory);
+
+    result.program((struct bf_runtime_context) {
+        /* NOTE! **Intentionally** offset the universe by one! */
+        .universe = universe,
+        .input_byte = dummy_input,
+    });
+
+    ASSERT_FALSEm("Input never called on correct address",
+            universe[1] == 3);
+    ASSERT_EQ_FMTm("Unexected value input",
+            CORRECT_INPUT, universe[1], "%hhu");
+
+    PASS();
+}
+
+
+
 SUITE(compile_suite) {
     GREATEST_SET_SETUP_CB(setup_compile, NULL);
     GREATEST_SET_TEARDOWN_CB(teardown_compile, NULL);
@@ -253,6 +282,7 @@ SUITE(compile_suite) {
     RUN_TEST(compiles_address_increment);
     RUN_TEST(compiles_address_decrement);
     RUN_TEST(compiles_output);
+    RUN_TEST(compiles_input);
 }
 
 

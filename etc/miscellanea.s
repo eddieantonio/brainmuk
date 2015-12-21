@@ -1,5 +1,25 @@
 .text
 
+# Stack layout
+#
+#        |----------------|
+#   0x20 | *input_byte    |
+#        |----------------|
+#   0x18 | *output_byte   |
+#        |----------------|
+#   0x10 | *universe      |
+#        |----------------|
+#   0x08 | [padding]      |
+#        |----------------|
+#   %rbp | prev. bp       |
+#        |----------------|
+#  -0x08 | save %rbx      |
+#        |----------------|
+#   0x10 | [padding]      |
+#        |----------------|
+#
+
+
 .global proper_intro
 proper_intro:
     # Prepare our stack frame.
@@ -54,4 +74,22 @@ call_output:
 
     # Restore %rbx
     movq    -0x8(%rbp), %rbx
+
+.global call_input
+call_input:
+    # Save %rbx
+    movq    %rbx, -0x8(%rbp)
+
+    # Do indirect call input_byte()
+    movb    $0x0, %al
+    leaq    0x10(%rbp), %rcx
+    callq   *0x10(%rcx)
+
+    # The value is returned in %al
+
+    # Restore %rbx
+    movq    -0x8(%rbp), %rbx
+
+    # *p = %al
+    movb    %al, (%rbx)
 

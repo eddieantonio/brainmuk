@@ -53,22 +53,37 @@ static const uint8_t decrement_data_pointer[] = {
 };
 
 static const uint8_t output_byte[] = {
-    /* Save instruction pointer (%rbx) */
+    /* save data pointer (%rbx) */
     0x48, 0x89, 0x5d, 0xf8, // movq     %rbx, -0x8(%rbp)
 
-    /* Prepare first argument (%edi = *p). */
+    /* prepare first argument (%edi = *p). */
     0x8a, 0x13,             // movb     (%rbx), %dl
     0x0f, 0xbe, 0xfa,       // movsbl   %dl, %edi
 
-    /* Do indirect call to output_byte(). */
+    /* do indirect call to output_byte(). */
     0x48, 0x8d, 0x45, 0x10, // leaq     0x10(%rbp), %rax
     0x48, 0x8b, 0x40, 0x08, // movq     0x8(%rax), %rax
     0xff, 0xd0,             // callq    *%rax
 
-    /* Restore instruction pointer (%rbx) */
+    /* restore instruction pointer (%rbx) */
+    0x48, 0x8b, 0x5d, 0xf8, // movq     -0x8(%rbp), %rbx
+};
+
+static const uint8_t input_byte[] = {
+    /* save data pointer (%rbx) */
+    0x48, 0x89, 0x5d, 0xf8, // movq     %rbx, -0x8(%rbp)
+
+    /* do indirect call to input_byte(). */
+    0x48, 0x8d, 0x4d, 0x10, // leaq     0x10(%rbp), %rcx
+    0xff, 0x51, 0x10,       // callq    *0x10(%rax)
+
+    /* restore instruction pointer (%rbx) */
     0x48, 0x8b, 0x5d, 0xf8, // movq     -0x8(%rbp), %rbx
 
+    /* Write the input back (returned by input_byte() in %al). */
+    0x88, 0x03,             // movb     %al, (%rbx)
 };
+
 
 
 /**
@@ -111,6 +126,9 @@ bf_compile_result bf_compile(const char *source, uint8_t *space) {
                 break;
             case '.':
                 append_snippet(output_byte);
+                break;
+            case ',':
+                append_snippet(input_byte);
                 break;
         }
 
