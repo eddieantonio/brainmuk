@@ -177,8 +177,6 @@ TEST compiles_simple_subtraction() {
 
     result.program((struct bf_runtime_context) {
         .universe = universe,
-        .output_byte = NULL,
-        .input_byte = NULL
     });
 
     ASSERT_EQ_FMTm("- did not decrement data", 0xFF, universe[0], "%hhu");
@@ -194,8 +192,6 @@ TEST compiles_address_increment() {
 
     result.program((struct bf_runtime_context) {
         .universe = universe,
-        .output_byte = NULL,
-        .input_byte = NULL
     });
 
     ASSERT_EQ_FMTm("> did not increment pointer", 0, universe[0], "%hhu");
@@ -213,12 +209,37 @@ TEST compiles_address_decrement() {
     result.program((struct bf_runtime_context) {
         /* NOTE! **Intentionally** offset the universe by one! */
         .universe = universe + 1,
-        .output_byte = NULL,
-        .input_byte = NULL
     });
 
     ASSERT_EQ_FMTm("< did not decrement pointer", 0, universe[1], "%hhu");
     ASSERT_EQ_FMTm("+ did not increment data", 1, universe[0], "%hhu");
+
+    PASS();
+}
+
+#define NOT_WRITTEN 0x100
+static int output = NOT_WRITTEN;
+static void dummy_output(char octet) {
+    output = octet;
+}
+
+TEST compiles_output() {
+    output = NOT_WRITTEN;
+
+    /* Shuffle the data pointer around to ensure output works abides. */
+    bf_compile_result result = bf_compile(">+++<>.", memory);
+    ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
+    ASSERT_EQm("Unexpected start address",
+            (uint8_t *) result.program, memory);
+
+    result.program((struct bf_runtime_context) {
+        /* NOTE! **Intentionally** offset the universe by one! */
+        .universe = universe,
+        .output_byte = dummy_output,
+    });
+
+    ASSERT_FALSEm("Output never called", output == NOT_WRITTEN);
+    ASSERT_EQ_FMTm("Unexected value written", 3, output, "%d");
 
     PASS();
 }
@@ -231,6 +252,7 @@ SUITE(compile_suite) {
     RUN_TEST(compiles_simple_subtraction);
     RUN_TEST(compiles_address_increment);
     RUN_TEST(compiles_address_decrement);
+    RUN_TEST(compiles_output);
 }
 
 

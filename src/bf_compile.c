@@ -52,6 +52,24 @@ static const uint8_t decrement_data_pointer[] = {
     0x48, 0xff, 0xcb        // decq %rax
 };
 
+static const uint8_t output_byte[] = {
+    /* Save instruction pointer (%rbx) */
+    0x48, 0x89, 0x5d, 0xf8, // movq     %rbx, -0x8(%rbp)
+
+    /* Prepare first argument (%edi = *p). */
+    0x8a, 0x13,             // movb     (%rbx), %dl
+    0x0f, 0xbe, 0xfa,       // movsbl   %dl, %edi
+
+    /* Do indirect call to output_byte(). */
+    0x48, 0x8d, 0x45, 0x10, // leaq     0x10(%rbp), %rax
+    0x48, 0x8b, 0x40, 0x08, // movq     0x8(%rax), %rax
+    0xff, 0xd0,             // callq    *%rax
+
+    /* Restore instruction pointer (%rbx) */
+    0x48, 0x8b, 0x5d, 0xf8, // movq     -0x8(%rbp), %rbx
+
+};
+
 
 /**
  * Macro that greatly simplifies cloning and concatenating machine code into
@@ -90,6 +108,9 @@ bf_compile_result bf_compile(const char *source, uint8_t *space) {
                 break;
             case '>':
                 append_snippet(increment_data_pointer);
+                break;
+            case '.':
+                append_snippet(output_byte);
                 break;
         }
 
