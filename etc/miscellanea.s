@@ -29,3 +29,10 @@ increment_data:
 decrement_data:
     decb    (%rbx)
 
+.global increment_ptr
+increment_ptr:
+    incq    %rbx
+
+.global decrement_ptr
+decrement_ptr:
+    decq    %rbx

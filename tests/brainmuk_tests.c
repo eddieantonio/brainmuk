@@ -186,12 +186,51 @@ TEST compiles_simple_subtraction() {
     PASS();
 }
 
+TEST compiles_address_increment() {
+    bf_compile_result result = bf_compile(">+", memory);
+    ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
+    ASSERT_EQm("Unexpected start address",
+            (uint8_t *) result.program, memory);
+
+    result.program((struct bf_runtime_context) {
+        .universe = universe,
+        .output_byte = NULL,
+        .input_byte = NULL
+    });
+
+    ASSERT_EQ_FMTm("> did not increment pointer", 0, universe[0], "%hhu");
+    ASSERT_EQ_FMTm("+ did not increment data", 1, universe[1], "%hhu");
+
+    PASS();
+}
+
+TEST compiles_address_decrement() {
+    bf_compile_result result = bf_compile("<+", memory);
+    ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
+    ASSERT_EQm("Unexpected start address",
+            (uint8_t *) result.program, memory);
+
+    result.program((struct bf_runtime_context) {
+        /* NOTE! **Intentionally** offset the universe by one! */
+        .universe = universe + 1,
+        .output_byte = NULL,
+        .input_byte = NULL
+    });
+
+    ASSERT_EQ_FMTm("< did not decrement pointer", 0, universe[1], "%hhu");
+    ASSERT_EQ_FMTm("+ did not increment data", 1, universe[0], "%hhu");
+
+    PASS();
+}
+
 SUITE(compile_suite) {
     GREATEST_SET_SETUP_CB(setup_compile, NULL);
     GREATEST_SET_TEARDOWN_CB(teardown_compile, NULL);
 
     RUN_TEST(compiles_simple_addition);
     RUN_TEST(compiles_simple_subtraction);
+    RUN_TEST(compiles_address_increment);
+    RUN_TEST(compiles_address_decrement);
 }
 
 

@@ -68,11 +68,22 @@ static const uint8_t decrement_memory[] = {
     0xfe, 0x0b              // decb (%rax)
 };
 
+static const uint8_t increment_data_pointer[] = {
+    /* (*p)++ */
+    0x48, 0xff, 0xc3        // incq %rax
+};
+
+static const uint8_t decrement_data_pointer[] = {
+    /* (*p)-- */
+    0x48, 0xff, 0xcb        // decq %rax
+};
+
+
 /**
  * Macro that greatly simplifies cloning and concatenating machine code into
  * the address space.
  */
-#define clone_snippet(snippet)                       \
+#define append_snippet(snippet)                       \
     do {                                             \
         memcpy(space + i, snippet, sizeof(snippet)); \
         i += sizeof(snippet);                        \
@@ -90,22 +101,28 @@ bf_compile_result bf_compile(const char *source, uint8_t *space) {
     /* TODO: deal with max size. */
     /* TODO: have nesting stack of labels. */
 
-    clone_snippet(function_prologue);
+    append_snippet(function_prologue);
 
     while (*current_instruction != '\0') {
         switch (*current_instruction) {
             case '+':
-                clone_snippet(increment_memory);
+                append_snippet(increment_memory);
                 break;
             case '-':
-                clone_snippet(decrement_memory);
+                append_snippet(decrement_memory);
+                break;
+            case '<':
+                append_snippet(decrement_data_pointer);
+                break;
+            case '>':
+                append_snippet(increment_data_pointer);
                 break;
         }
 
         current_instruction++;
     }
 
-    clone_snippet(function_epilogue);
+    append_snippet(function_epilogue);
 
     return (bf_compile_result) {
         .status = BF_COMPILE_SUCCESS,
