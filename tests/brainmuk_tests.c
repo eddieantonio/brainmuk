@@ -51,6 +51,11 @@ TEST parses_suffixed_minimum_size() {
     PASS();
 }
 
+SUITE(argument_parsing_suite) {
+    RUN_TEST(parses_unsuffixed_minimum_size);
+    RUN_TEST(parses_suffixed_minimum_size);
+}
+
 /********************* tests for slurp() and unslurp() *********************/
 
 TEST normal_file_can_be_slurped_and_unslurped() {
@@ -66,6 +71,10 @@ TEST normal_file_can_be_slurped_and_unslurped() {
 
     PASS();
 #undef test_filename
+}
+
+SUITE(slurp_suite) {
+    RUN_TEST(normal_file_can_be_slurped_and_unslurped);
 }
 
 /******************* tests for allocate_executable_space *******************/
@@ -115,6 +124,11 @@ TEST space_returned_is_given_size(void) {
     ASSERTm("Could not free space", free_executable_space(space));
 
     PASS();
+}
+
+SUITE(allocate_executable_suite) {
+    RUN_TEST(space_returned_can_be_executed_and_freed);
+    RUN_TEST(space_returned_is_given_size);
 }
 
 /*************************** tests for compile() ***************************/
@@ -169,6 +183,10 @@ TEST compiles_simple_subtraction() {
     PASS();
 }
 
+SUITE(compile_suite) {
+    RUN_TEST(compiles_simple_addition);
+    RUN_TEST(compiles_simple_subtraction);
+}
 
 
 /********************************** main() **********************************/
@@ -179,16 +197,10 @@ GREATEST_MAIN_DEFS();
 int main(int argc, char **argv) {
     GREATEST_MAIN_BEGIN();      /* command-line arguments, initialization. */
 
-    RUN_TEST(parses_unsuffixed_minimum_size);
-    RUN_TEST(parses_suffixed_minimum_size);
-
-    RUN_TEST(space_returned_can_be_executed_and_freed);
-    RUN_TEST(space_returned_is_given_size);
-
-    RUN_TEST(normal_file_can_be_slurped_and_unslurped);
-
-    RUN_TEST(compiles_simple_addition);
-    RUN_TEST(compiles_simple_subtraction);
+    RUN_SUITE(argument_parsing_suite);
+    RUN_SUITE(slurp_suite);
+    RUN_SUITE(allocate_executable_suite);
+    RUN_SUITE(compile_suite);
 
     GREATEST_MAIN_END();        /* display results */
 }
