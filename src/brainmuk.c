@@ -1,12 +1,60 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <unistd.h>
 
 #include <brainmuk.h>
 
+#include <bf_alloc.h>
+#include <bf_compile.h>
+#include <bf_slurp.h>
+
+__attribute__((noreturn))
+static void usage_error(const char *program_name);
+
+static void bf_runtime_output_byte(char byte);
+static char bf_runtime_input_byte();
 
 int brainmuk(int argc, char *argv[]) {
-    parse_arguments(argc, argv);
+    bf_options options = parse_arguments(argc, argv);
+
+    /* Check if a file has been provided. */
+    if (options.filename == NULL) {
+        fprintf(stderr, "%s: Must provide one filename\n", argv[0]);
+        usage_error(argv[0]);
+    }
+
+    char *contents = slurp(options.filename);
+
+    /* Try to open the file... */
+    if (contents == NULL) {
+        fprintf(stderr, "%s: Could not open '%s': ",
+                argv[0], options.filename);
+        perror(NULL);
+        exit(-1);
+    }
+
+    /* Get space for the stuff. */
+    uint8_t *exec_mem = allocate_executable_space(getpagesize());
+
+    /* Compile and forget the source. */
+    bf_compile_result compilation = bf_compile(contents, exec_mem);
+    unslurp(contents);
+
+    if (compilation.status == BF_COMPILE_SUCCESS) {
+        uint8_t *universe = calloc(options.minimum_universe_size, sizeof(uint8_t));
+        compilation.program((struct bf_runtime_context) {
+            .universe = universe,
+            .output_byte = bf_runtime_output_byte,
+            .input_byte = bf_runtime_input_byte
+        });
+        free(universe);
+    } else {
+        fprintf(stderr, "%s: %s: compilation failed!\n",
+                argv[0], options.filename);
+        exit(compilation.status);
+    }
+
     return 0;
 }
 
@@ -147,4 +195,13 @@ bf_options parse_arguments(int argc, char **argv) {
     optind = 0;
 
     return parameters;
+}
+
+static void bf_runtime_output_byte(char byte) {
+    putchar(byte);
+}
+
+static char bf_runtime_input_byte() {
+    /* TODO: do something on EOF? */
+    return getchar();
 }
