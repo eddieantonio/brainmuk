@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 
-typedef enum {
+enum bf_compile_status {
     /** Compilation was successful. */
     BF_COMPILE_SUCCESS = 0,
     /** The given program space looks invalid. */
@@ -17,7 +17,7 @@ typedef enum {
     BF_COMPILE_INSUFFICIENT_MEMORY,
     /** Program exhibited invalid nesting. */
     BF_COMPILE_NESTING_ERROR,
-} bf_compile_status;
+};
 
 /**
  * Stores all runtime context.
@@ -42,6 +42,24 @@ struct bf_runtime_context {
 typedef void (*program_t)(struct bf_runtime_context);
 
 /**
+ * Tagged union that represents the result of compilation.
+ */
+typedef struct {
+    enum bf_compile_status status;
+
+    union {
+        /** The compiled program as result of compilation. */
+        program_t program;
+
+        /** The location of an error. */
+        struct {
+            unsigned long err_line;
+            unsigned long err_col;
+        };
+    };
+} bf_compile_result;
+
+/**
  * Compiles the null-terminated source text to the given space.
  * When this function returns BF_COMPILE_SUCCES
  *
@@ -50,6 +68,6 @@ typedef void (*program_t)(struct bf_runtime_context);
  *
  * @return the compilation status.
  */
-extern bf_compile_status bf_compile(const char *source, program_t space);
+bf_compile_result bf_compile(const char *source, uint8_t *space);
 
 #endif /* BF_COMPILE_H */

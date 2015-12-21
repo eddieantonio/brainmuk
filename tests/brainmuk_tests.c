@@ -5,6 +5,7 @@
 
 #include <brainmuk.h>
 #include <bf_alloc.h>
+#include <bf_compile.h>
 #include <bf_slurp.h>
 
 /*********************** tests for parse_arguments() ***********************/
@@ -116,6 +117,31 @@ TEST space_returned_is_given_size(void) {
     PASS();
 }
 
+/*************************** tests for compile() ***************************/
+TEST compiles_simple_addition() {
+    uint8_t universe[256];
+    memset(universe, 0, sizeof(universe));
+
+    uint8_t *memory = allocate_executable_space(getpagesize() - 1);
+    ASSERT_FALSEm("Failed to allocate executable space", memory == NULL);
+
+    bf_compile_result result = bf_compile("+", memory);
+    ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
+    ASSERT_EQm("Unexpected program location",
+            (uint8_t *) result.program, memory);
+
+    result.program((struct bf_runtime_context) {
+        .universe = universe,
+        .output_byte = NULL,
+        .input_byte = NULL
+    });
+
+    ASSERT_EQ_FMTm("+ did not increment data", 1, universe[0], "%hhu");
+
+    PASS();
+}
+
+
 /********************************** main() **********************************/
 
 /* Add all the definitions that need to be in the test runner's main file. */
@@ -131,6 +157,8 @@ int main(int argc, char **argv) {
     RUN_TEST(space_returned_is_given_size);
 
     RUN_TEST(normal_file_can_be_slurped_and_unslurped);
+
+    RUN_TEST(compiles_simple_addition);
 
     GREATEST_MAIN_END();        /* display results */
 }
