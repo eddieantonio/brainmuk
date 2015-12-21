@@ -34,6 +34,8 @@ static const uint8_t function_prologue[] = {
     0x55,                   // pushq    %rbp
     0x48, 0x89, 0xe5,       // movq     %rsp, %rbp
 
+    /* TODO: establish a convention for register usage. */
+
     /* Load address of... universe address into %eax. */
     0x48, 0x8d, 0x45, 0x10, // leaq     0x10(%rbp), %rax
     /* %rax = p */
@@ -46,15 +48,25 @@ static const uint8_t function_epilogue[] = {
     0xc3,                   // retq
 };
 
-static const uint8_t add_memory[] = {
+static const uint8_t increment_memory[] = {
     /* %cl = *p */
     0x8a, 0x08,             // movb     (%rax), %cl
     /* %cl++ */
     0x80, 0xc1, 0x01,       // addb     $0x1, %cl
     /* *p = %cl */
     0x88, 0x08,             // movb     %cl, (%rax)
+    /* TODO: Use incb (%rax) */
 };
 
+static const uint8_t decrement_memory[] = {
+    /* %cl = *p */
+    0x8a, 0x08,             // movb     (%rax), %cl
+    /* %cl++ */
+    0x80, 0xc1, 0xff,       // addb     $-0x1, %cl
+    /* *p = %cl */
+    0x88, 0x08,             // movb     %cl, (%rax)
+    /* TODO: Use decb (%rax) */
+};
 
 /**
  * Macro that greatly simplifies cloning and concatenating machine code into
@@ -67,11 +79,32 @@ static const uint8_t add_memory[] = {
     } while (0)
 
 
+/*
+ * Note: the input to compile MUST be null-terminated!
+ */
 bf_compile_result bf_compile(const char *source, uint8_t *space) {
     size_t i = 0;
 
+    const char *current_instruction = source;
+
+    /* TODO: deal with max size. */
+    /* TODO: have nesting stack of labels. */
+
     clone_snippet(function_prologue);
-    clone_snippet(add_memory);
+
+    while (*current_instruction != '\0') {
+        switch (*current_instruction) {
+            case '+':
+                clone_snippet(increment_memory);
+                break;
+            case '-':
+                clone_snippet(decrement_memory);
+                break;
+        }
+
+        current_instruction++;
+    }
+
     clone_snippet(function_epilogue);
 
     return (bf_compile_result) {

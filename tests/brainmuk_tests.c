@@ -118,6 +118,7 @@ TEST space_returned_is_given_size(void) {
 }
 
 /*************************** tests for compile() ***************************/
+
 TEST compiles_simple_addition() {
     uint8_t universe[256];
     memset(universe, 0, sizeof(universe));
@@ -138,8 +139,36 @@ TEST compiles_simple_addition() {
 
     ASSERT_EQ_FMTm("+ did not increment data", 1, universe[0], "%hhu");
 
+    ASSERTm("Could not free space", free_executable_space(memory));
+
     PASS();
 }
+
+TEST compiles_simple_subtraction() {
+    uint8_t universe[256];
+    memset(universe, 0, sizeof(universe));
+
+    uint8_t *memory = allocate_executable_space(getpagesize() - 1);
+    ASSERT_FALSEm("Failed to allocate executable space", memory == NULL);
+
+    bf_compile_result result = bf_compile("-", memory);
+    ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
+    ASSERT_EQm("Unexpected program location",
+            (uint8_t *) result.program, memory);
+
+    result.program((struct bf_runtime_context) {
+        .universe = universe,
+        .output_byte = NULL,
+        .input_byte = NULL
+    });
+
+    ASSERT_EQ_FMTm("- did not decrement data", 0xFF, universe[0], "%hhu");
+
+    ASSERTm("Could not free space", free_executable_space(memory));
+
+    PASS();
+}
+
 
 
 /********************************** main() **********************************/
@@ -159,6 +188,7 @@ int main(int argc, char **argv) {
     RUN_TEST(normal_file_can_be_slurped_and_unslurped);
 
     RUN_TEST(compiles_simple_addition);
+    RUN_TEST(compiles_simple_subtraction);
 
     GREATEST_MAIN_END();        /* display results */
 }
