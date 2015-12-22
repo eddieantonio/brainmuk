@@ -1,7 +1,8 @@
-#include <bf_alloc.h>
-
 /* So that MAP_ANONYMOUS is available on glibc. */
 #define _BSD_SOURCE
+
+#include <bf_alloc.h>
+
 #include <sys/mman.h>
 #ifndef MAP_ANONYMOUS
 #define MAP_ANONYMOUS MAP_ANON
