@@ -196,7 +196,7 @@ static uint8_t universe[256] = { 0 };
 static uint8_t *memory = NULL;
 
 /* Zeros the universe and allocates fresh executable memory. */
-static void setup_compile(void *data) {
+static void setup_compile(void *data __attribute__ ((unused))) {
     memset(universe, 0, sizeof(universe));
     assert(memory == NULL && "(uint_8 *) memory in unexpected state");
 
@@ -205,7 +205,7 @@ static void setup_compile(void *data) {
 }
 
 /* Deallocates the executable space. */
-static void teardown_compile(void *data) {
+static void teardown_compile(void *data __attribute__ ((unused))) {
     assert(free_executable_space(memory) && "Could not free space");
     memory = NULL;
 }

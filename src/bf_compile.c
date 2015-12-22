@@ -137,7 +137,7 @@ static size_t start_loop(uint8_t *space, size_t i, struct loop_context *ctx) {
 
 static void patch_with(uint8_t* location, int32_t amount) {
     /* Ensure that the patch location is filled with the placeholder. */
-    for (int i = 0; i < sizeof(int32_t); i++) {
+    for (size_t i = 0; i < sizeof(int32_t); i++) {
         assert(location[i] == 0xFF);
     }
 

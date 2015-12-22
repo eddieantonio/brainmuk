@@ -163,7 +163,7 @@ bf_options parse_arguments(int argc, char **argv) {
             .flag = NULL,
             .val = 'v',
         },
-        { 0 }
+        { NULL, 0, NULL, 0 }
     };
     int option = -1;
 
