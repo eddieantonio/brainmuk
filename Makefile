@@ -70,4 +70,7 @@ $(TESTBIN): $(TESTBIN).c $(OBJS)
 $(DISTNAME).tar.gz: $(SRCS) Makefile LICENSE README.md
 	git archive HEAD --prefix=$(DISTNAME)/ | gzip > $@
 
+include/bf_version.h: Makefile
+	echo '#define BF_VERSION "$(VERSION)"' > $@
+
 .PHONY: all clean dist test watch

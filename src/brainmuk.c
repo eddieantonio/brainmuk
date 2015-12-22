@@ -8,6 +8,7 @@
 #include <bf_alloc.h>
 #include <bf_compile.h>
 #include <bf_slurp.h>
+#include <bf_version.h>
 
 __attribute__((noreturn))
 static void usage_error(const char *program_name);
@@ -42,7 +43,16 @@ int brainmuk(int argc, char *argv[]) {
     unslurp(contents);
 
     if (compilation.status == BF_COMPILE_SUCCESS) {
+        /* Allocate the UNIVERSE and run. */
         uint8_t *universe = calloc(options.minimum_universe_size, sizeof(uint8_t));
+
+        if (universe == NULL) {
+            fprintf(stderr, "%s: could not create universe (%lu bytes): ",
+                    argv[0], options.minimum_universe_size);
+            perror(NULL);
+            exit(-1);
+        }
+
         compilation.program((struct bf_runtime_context) {
             .universe = universe,
             .output_byte = bf_runtime_output_byte,
@@ -71,9 +81,8 @@ static void usage_error(const char *program_name) {
     exit(0);
 }
 
-/* TODO: generate from Makefile or git-describe. */
 static void version(const char* program_name) {
-    printf("%s 0.1.0\n", program_name);
+    printf("%s " BF_VERSION "\n", program_name);
 }
 
 #define INVALID_SIZE    0
@@ -186,7 +195,7 @@ bf_options parse_arguments(int argc, char **argv) {
         }
     }
 
-    /* If we have arguments left-over. */
+    /* If we have arguments left-over, let it be the filename. */
     if (optind < argc) {
         parameters.filename = argv[optind];
     }
