@@ -404,6 +404,7 @@ SUITE(compile_suite) {
     RUN_TEST(compiles_output);
     RUN_TEST(compiles_input);
     RUN_TEST(compiles_branch_skip);
+    RUN_TEST(compiles_branch_instructions);
     RUN_TEST(compiles_nested_branches);
 }
 
