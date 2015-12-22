@@ -277,7 +277,7 @@ TEST compiles_address_decrement() {
 
 #define NOT_WRITTEN 0x100
 static int output = NOT_WRITTEN;
-static void dummy_output(char octet) {
+static void dummy_output(uint8_t octet) {
     output = octet;
 }
 
@@ -302,7 +302,7 @@ TEST compiles_output() {
 }
 
 #define DETERMINISTIC_INPUT 42
-static char dummy_input(void) {
+static uint8_t dummy_input(void) {
     return DETERMINISTIC_INPUT;
 }
 

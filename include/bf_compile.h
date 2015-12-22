@@ -30,8 +30,8 @@ enum bf_compile_status {
  */
 struct bf_runtime_context {
     uint8_t *universe;
-    void (*output_byte)(char);
-    char (*input_byte)();
+    void (*output_byte)(uint8_t);
+    uint8_t (*input_byte)();
 };
 
 /**

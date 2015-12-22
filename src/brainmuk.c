@@ -13,8 +13,8 @@
 __attribute__((noreturn))
 static void usage_error(const char *program_name);
 
-static void bf_runtime_output_byte(char byte);
-static char bf_runtime_input_byte();
+static void bf_runtime_output_byte(uint8_t byte);
+static uint8_t bf_runtime_input_byte();
 
 int brainmuk(int argc, char *argv[]) {
     bf_options options = parse_arguments(argc, argv);
@@ -209,7 +209,7 @@ bf_options parse_arguments(int argc, char **argv) {
 /**
  * A void wrapper for putchar.
  */
-static void bf_runtime_output_byte(char byte) {
+static void bf_runtime_output_byte(uint8_t byte) {
     putchar(byte);
 }
 
@@ -218,7 +218,7 @@ static void bf_runtime_output_byte(char byte) {
  *          0xFF is a good value to use because it's relatively easy to
  *          compare to (simply add one), and it's an invalid UTF-8 byte.
  */
-static char bf_runtime_input_byte() {
+static uint8_t bf_runtime_input_byte() {
     int c = getchar();
     if (c == EOF) {
         return 0xFF;
