@@ -4,6 +4,11 @@
 
 #include <bf_compile.h>
 
+/**
+ * Loops may only be nested upto this length.
+ */
+#define MAX_NESTING_DEPTH 128
+
 /* Context for outputing a loop. */
 struct loop_context {
     /* Offset of the loop set up. */
@@ -169,11 +174,10 @@ static size_t end_loop(uint8_t *space, size_t i, struct loop_context *ctx) {
 bf_compile_result bf_compile(const char *source, uint8_t *space) {
     size_t i = 0;
     int current_loop = -1;
-    struct loop_context contexts[1];
+    struct loop_context contexts[MAX_NESTING_DEPTH];
     const char *current_instruction = source;
 
     /* TODO: deal with max size. */
-    /* TODO: have nesting stack of labels. */
 
     append_snippet(function_prologue);
 
@@ -194,16 +198,19 @@ bf_compile_result bf_compile(const char *source, uint8_t *space) {
             case '[':
                 current_loop++;
                 assert(current_loop >= 0);
-                if (current_loop > 0) {
+
+                /* Crash if the nesting depth is too deep. */
+                if (current_loop >= MAX_NESTING_DEPTH) {
                     return (bf_compile_result) {
-                        .status = -1,
+                        .status = BF_COMPILE_NESTING_ERROR,
                         .program = NULL
                     };
                 }
+
                 i = start_loop(space, i, &contexts[current_loop]);
                 break;
             case ']':
-                assert(current_loop >= 0);
+                assert(current_loop >= 0 && current_loop < MAX_NESTING_DEPTH);
                 i = end_loop(space, i, &contexts[current_loop]);
                 current_loop--;
                 break;

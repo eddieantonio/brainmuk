@@ -327,7 +327,7 @@ TEST compiles_input() {
     PASS();
 }
 
-TEST compiles_branch_instructions() {
+TEST compiles_branch_skip() {
     output = NOT_WRITTEN;
 
     /* A branch on zero will skip what's inside. */
@@ -350,6 +350,49 @@ TEST compiles_branch_instructions() {
     PASS();
 }
 
+TEST compiles_branch_instructions() {
+    output = NOT_WRITTEN;
+
+    /* Moves 0xFF from the first cell to the second. */
+    bf_compile_result result = bf_compile("-[->+<]", memory);
+    ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
+    ASSERT_EQm("Unexpected start address",
+            (uint8_t *) result.program, memory);
+
+    result.program((struct bf_runtime_context) {
+        .universe = universe,
+        .output_byte = dummy_output,
+        .input_byte = dummy_input,
+    });
+
+    /* Checks if either input or output were called. */
+    ASSERT_EQ_FMTm("Unexpected value", 0x00, universe[0], "%hhu");
+    ASSERT_EQ_FMTm("Unexpected value", 0xff, universe[1], "%hhu");
+
+    PASS();
+}
+
+TEST compiles_nested_branches() {
+    output = NOT_WRITTEN;
+
+    /* Really silly; the inner "loop" outputs, and ends both loops. */
+    bf_compile_result result = bf_compile("+[[.-]]", memory);
+    ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
+    ASSERT_EQm("Unexpected start address",
+            (uint8_t *) result.program, memory);
+
+    result.program((struct bf_runtime_context) {
+        .universe = universe,
+        .output_byte = dummy_output,
+    });
+
+    /* Checks if either input or output were called. */
+    ASSERT_FALSEm("Did not call output", output == NOT_WRITTEN);
+    ASSERT_EQ_FMTm("Unexpected value", 0, universe[0], "%hhu");
+
+    PASS();
+}
+
 SUITE(compile_suite) {
     GREATEST_SET_SETUP_CB(setup_compile, NULL);
     GREATEST_SET_TEARDOWN_CB(teardown_compile, NULL);
@@ -360,7 +403,8 @@ SUITE(compile_suite) {
     RUN_TEST(compiles_address_decrement);
     RUN_TEST(compiles_output);
     RUN_TEST(compiles_input);
-    RUN_TEST(compiles_branch_instructions);
+    RUN_TEST(compiles_branch_skip);
+    RUN_TEST(compiles_nested_branches);
 }
 
 
