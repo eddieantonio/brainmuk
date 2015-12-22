@@ -47,6 +47,9 @@ dist: $(DISTNAME).tar.gz
 test: $(TESTBIN)
 	./$< $(TEST_OPTIONS)
 
+full-test: $(BIN) test
+	./$< tests/hello.bf
+
 # Requires rerun <https://github.com/alexch/rerun> to be installed.
 watch:
 	@if hash rerun ; \
@@ -73,4 +76,4 @@ $(DISTNAME).tar.gz: $(SRCS) Makefile LICENSE README.md
 include/bf_version.h: Makefile
 	echo '#define BF_VERSION "$(VERSION)"' > $@
 
-.PHONY: all clean dist test watch
+.PHONY: all clean dist test full-test watch
