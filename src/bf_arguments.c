@@ -141,5 +141,5 @@ void usage(const char* program_name, FILE *stream) {
 __attribute__((noreturn))
 void usage_error(const char *program_name) {
     usage(program_name, stderr);
-    exit(0);
+    exit(-1);
 }
