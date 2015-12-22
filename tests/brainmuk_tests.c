@@ -163,7 +163,7 @@ TEST space_returned_can_be_executed_and_freed(void) {
 TEST space_returned_is_given_size(void) {
     /* Allocate some biggish size of executable memory (bigger than the size
      * of one page, at least). */
-    size_t base_size = getpagesize() * 10 + 1;
+    size_t base_size = sysconf(_SC_PAGESIZE) * 10 + 1;
     size_t size = base_size + 1;
     uint8_t* space = allocate_executable_space(size);
 

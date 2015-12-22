@@ -36,7 +36,7 @@ int brainmuk(int argc, char *argv[]) {
     }
 
     /* Get space for the stuff. */
-    uint8_t *exec_mem = allocate_executable_space(getpagesize());
+    uint8_t *exec_mem = allocate_executable_space(sysconf(_SC_PAGESIZE));
 
     /* Compile and forget the source. */
     bf_compile_result compilation = bf_compile(contents, exec_mem);
