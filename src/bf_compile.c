@@ -7,7 +7,11 @@
 /**
  * Loops may only be nested upto this length.
  */
-#define MAX_NESTING_DEPTH 128
+#define MAX_NESTING_DEPTH   128
+/**
+ * We're not in any loop!
+ */
+#define NOT_IN_LOOP         -1
 
 /* Context for outputing a loop. */
 struct loop_context {
@@ -168,12 +172,19 @@ static size_t end_loop(uint8_t *space, size_t i, struct loop_context *ctx) {
     return i;
 }
 
+static bf_compile_result error_status(enum bf_compile_status status) {
+    return (bf_compile_result) {
+        .status = status,
+        .program = NULL
+    };
+}
+
 /*
  * Note: the input to compile MUST be null-terminated!
  */
 bf_compile_result bf_compile(const char *source, uint8_t *space) {
     size_t i = 0;
-    int current_loop = -1;
+    int current_loop = NOT_IN_LOOP;
     struct loop_context contexts[MAX_NESTING_DEPTH];
     const char *current_instruction = source;
 
@@ -209,11 +220,17 @@ bf_compile_result bf_compile(const char *source, uint8_t *space) {
 
                 i = start_loop(space, i, &contexts[current_loop]);
                 break;
+
             case ']':
+                if (current_loop == NOT_IN_LOOP) {
+                    return error_status(BF_COMPILE_UNMATCHED_BRACKET);
+                }
+
                 assert(current_loop >= 0 && current_loop < MAX_NESTING_DEPTH);
                 i = end_loop(space, i, &contexts[current_loop]);
                 current_loop--;
                 break;
+
             case '.':
                 append_snippet(output_byte);
                 break;

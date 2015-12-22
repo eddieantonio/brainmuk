@@ -395,6 +395,17 @@ TEST compiles_nested_branches() {
     PASS();
 }
 
+TEST errors_on_unmatched_brackets() {
+    bf_compile_result result = bf_compile("+]", memory);
+    ASSERT_EQm("Unexpected status", BF_COMPILE_UNMATCHED_BRACKET, result.status);
+    /* TODO: have row/col information? */
+
+    result = bf_compile("[]+]", memory);
+    ASSERT_EQm("Unexpected status", BF_COMPILE_UNMATCHED_BRACKET, result.status);
+
+    PASS();
+}
+
 SUITE(compile_suite) {
     GREATEST_SET_SETUP_CB(setup_compile, NULL);
     GREATEST_SET_TEARDOWN_CB(teardown_compile, NULL);
@@ -408,6 +419,7 @@ SUITE(compile_suite) {
     RUN_TEST(compiles_branch_skip);
     RUN_TEST(compiles_branch_instructions);
     RUN_TEST(compiles_nested_branches);
+    RUN_TEST(errors_on_unmatched_brackets);
 }
 
 
