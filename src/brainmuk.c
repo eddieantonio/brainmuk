@@ -197,11 +197,22 @@ bf_options parse_arguments(int argc, char **argv) {
     return parameters;
 }
 
+/**
+ * A void wrapper for putchar.
+ */
 static void bf_runtime_output_byte(char byte) {
     putchar(byte);
 }
 
+/**
+ * @return  the character; if the stream has reached EOF, returns 0xFF.
+ *          0xFF is a good value to use because it's relatively easy to
+ *          compare to (simply add one), and it's an invalid UTF-8 byte.
+ */
 static char bf_runtime_input_byte() {
-    /* TODO: do something on EOF? */
-    return getchar();
+    int c = getchar();
+    if (c == EOF) {
+        return 0xFF;
+    }
+    return c;
 }
