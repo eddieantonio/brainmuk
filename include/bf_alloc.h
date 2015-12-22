@@ -18,8 +18,9 @@ uint8_t *allocate_executable_space(size_t size);
 
 /**
  * Frees space allocated with allocate_executable_space
+ *
  * @return  bool    true if succeeded; false otherwise.
  */
-bool free_executable_space(uint8_t *space);
+bool free_executable_space(uint8_t *space, size_t size);
 
 #endif /* BF_ALLOC_H */

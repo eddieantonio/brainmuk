@@ -22,7 +22,7 @@ WATCH_COMMAND = make test
 TEST_OPTIONS =
 
 NAME = brainmuk
-VERSION = 0.1.0
+VERSION = 0.1.1
 
 BIN = $(NAME)
 TESTBIN = tests/$(NAME)_tests

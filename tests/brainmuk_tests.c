@@ -4,8 +4,8 @@
 
 #include "greatest.h"
 
-#include <brainmuk.h>
 #include <bf_alloc.h>
+#include <bf_arguments.h>
 #include <bf_compile.h>
 #include <bf_slurp.h>
 
@@ -155,7 +155,7 @@ TEST space_returned_can_be_executed_and_freed(void) {
     /* At this point, a seg fault would indicate failure. */
 
     /* Otherwise, deallocate! */
-    ASSERTm("Could not free space", free_executable_space(space));
+    ASSERTm("Could not free space", free_executable_space(space, 1));
 
     PASS();
 }
@@ -180,7 +180,7 @@ TEST space_returned_is_given_size(void) {
     /* At this point, a segmentation fault would indicate failure. */
 
     /* Otherwise, deallocate! */
-    ASSERTm("Could not free space", free_executable_space(space));
+    ASSERTm("Could not free space", free_executable_space(space, size));
 
     PASS();
 }
@@ -192,6 +192,7 @@ SUITE(allocate_executable_suite) {
 
 /*************************** tests for compile() ***************************/
 
+#define EXEC_MEMORY_SIZE (sysconf(_SC_PAGESIZE) - 1)
 static uint8_t universe[256] = { 0 };
 static uint8_t *memory = NULL;
 
@@ -200,13 +201,14 @@ static void setup_compile(void *data __attribute__ ((unused))) {
     memset(universe, 0, sizeof(universe));
     assert(memory == NULL && "(uint_8 *) memory in unexpected state");
 
-    memory = allocate_executable_space(getpagesize() - 1);
+    memory = allocate_executable_space(EXEC_MEMORY_SIZE);
     assert(memory != NULL && "Failed to allocate executable space");
 }
 
 /* Deallocates the executable space. */
 static void teardown_compile(void *data __attribute__ ((unused))) {
-    assert(free_executable_space(memory) && "Could not free space");
+    assert(free_executable_space(memory, EXEC_MEMORY_SIZE)
+            && "Could not free space");
     memory = NULL;
 }
 

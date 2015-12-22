@@ -1,85 +1,9 @@
-#include <stdlib.h>
 #include <stdio.h>
 #include <getopt.h>
-#include <unistd.h>
+#include <stdlib.h>
 
-#include <brainmuk.h>
-
-#include <bf_alloc.h>
-#include <bf_compile.h>
-#include <bf_slurp.h>
+#include <bf_arguments.h>
 #include <bf_version.h>
-
-__attribute__((noreturn))
-static void usage_error(const char *program_name);
-
-static void bf_runtime_output_byte(uint8_t byte);
-static uint8_t bf_runtime_input_byte();
-
-int brainmuk(int argc, char *argv[]) {
-    bf_options options = parse_arguments(argc, argv);
-
-    /* Check if a file has been provided. */
-    if (options.filename == NULL) {
-        fprintf(stderr, "%s: Must provide one filename\n", argv[0]);
-        usage_error(argv[0]);
-    }
-
-    char *contents = slurp(options.filename);
-
-    /* Try to open the file... */
-    if (contents == NULL) {
-        fprintf(stderr, "%s: Could not open '%s': ",
-                argv[0], options.filename);
-        perror(NULL);
-        exit(-1);
-    }
-
-    /* Get space for the stuff. */
-    uint8_t *exec_mem = allocate_executable_space(sysconf(_SC_PAGESIZE));
-
-    /* Compile and forget the source. */
-    bf_compile_result compilation = bf_compile(contents, exec_mem);
-    unslurp(contents);
-
-    if (compilation.status == BF_COMPILE_SUCCESS) {
-        /* Allocate the UNIVERSE and run. */
-        uint8_t *universe = calloc(options.minimum_universe_size, sizeof(uint8_t));
-
-        if (universe == NULL) {
-            fprintf(stderr, "%s: could not create universe (%lu bytes): ",
-                    argv[0], options.minimum_universe_size);
-            perror(NULL);
-            exit(-1);
-        }
-
-        compilation.program((struct bf_runtime_context) {
-            .universe = universe,
-            .output_byte = bf_runtime_output_byte,
-            .input_byte = bf_runtime_input_byte
-        });
-        free(universe);
-    } else {
-        fprintf(stderr, "%s: %s: compilation failed!\n",
-                argv[0], options.filename);
-        exit(compilation.status);
-    }
-
-    return 0;
-}
-
-static void usage(const char* program_name, FILE *stream) {
-    fprintf(stream,
-        "Usage:\t%s [-m SIZE] file\n"
-        "\t%s [--help|--version]\n",
-        program_name, program_name);
-}
-
-__attribute__((noreturn))
-static void usage_error(const char *program_name) {
-    usage(program_name, stderr);
-    exit(0);
-}
 
 static void version(const char* program_name) {
     printf("%s " BF_VERSION "\n", program_name);
@@ -172,6 +96,7 @@ bf_options parse_arguments(int argc, char **argv) {
         switch (option) {
             case 'h': /* --help */
                 usage(argv[0], stdout);
+                exit(0);
                 break;
 
             case 'm': /* --minimum-universe */
@@ -206,22 +131,15 @@ bf_options parse_arguments(int argc, char **argv) {
     return parameters;
 }
 
-/**
- * A void wrapper for putchar.
- */
-static void bf_runtime_output_byte(uint8_t byte) {
-    putchar(byte);
+void usage(const char* program_name, FILE *stream) {
+    fprintf(stream,
+        "Usage:\t%s [-m SIZE] file\n"
+        "\t%s [--help|--version]\n",
+        program_name, program_name);
 }
 
-/**
- * @return  the character; if the stream has reached EOF, returns 0xFF.
- *          0xFF is a good value to use because it's relatively easy to
- *          compare to (simply add one), and it's an invalid UTF-8 byte.
- */
-static uint8_t bf_runtime_input_byte() {
-    int c = getchar();
-    if (c == EOF) {
-        return 0xFF;
-    }
-    return c;
+__attribute__((noreturn))
+void usage_error(const char *program_name) {
+    usage(program_name, stderr);
+    exit(0);
 }
