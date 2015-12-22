@@ -1,7 +1,7 @@
 #include <bf_alloc.h>
 
 /* So that MAP_ANONYMOUS is available on glibc. */
-#define _BSD_SOURCE
+#define _GNU_SOURCE
 #include <sys/mman.h>
 
 uint8_t *allocate_executable_space(size_t size) {
