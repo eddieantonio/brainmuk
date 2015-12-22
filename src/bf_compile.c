@@ -202,7 +202,7 @@ bf_compile_result bf_compile(const char *source, uint8_t *space) {
                 /* Crash if the nesting depth is too deep. */
                 if (current_loop >= MAX_NESTING_DEPTH) {
                     return (bf_compile_result) {
-                        .status = BF_COMPILE_NESTING_ERROR,
+                        .status = BF_COMPILE_NESTING_TOO_DEEP,
                         .program = NULL
                     };
                 }

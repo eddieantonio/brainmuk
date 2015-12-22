@@ -11,12 +11,11 @@
 enum bf_compile_status {
     /** Compilation was successful. */
     BF_COMPILE_SUCCESS = 0,
-    /** The given program space looks invalid. */
-    BF_COMPILE_SPACE_INVALID,
-    /** Ran out of memory. */
-    BF_COMPILE_INSUFFICIENT_MEMORY,
-    /** Program exhibited invalid nesting. */
-    BF_COMPILE_NESTING_ERROR,
+    /** Program has unmatched brackets. */
+    BF_COMPILE_UNMATCHED_BRACKET,
+    BF_COMPILE_NESTING_TOO_DEEP,
+    /* A totally generic error. */
+    BF_COMPILE_ERROR,
 };
 
 /**
