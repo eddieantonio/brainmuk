@@ -402,6 +402,19 @@ TEST errors_on_unmatched_brackets() {
 
     result = bf_compile("[]+]", memory);
     ASSERT_EQm("Unexpected status", BF_COMPILE_UNMATCHED_BRACKET, result.status);
+    /* TODO: have row/col information? */
+
+    PASS();
+}
+
+TEST errors_on_open_bracket() {
+    bf_compile_result result = bf_compile("[+", memory);
+    ASSERT_EQm("Unexpected status", BF_COMPILE_UNMATCHED_BRACKET, result.status);
+    /* TODO: have row/col information? */
+
+    result = bf_compile("-[+[>", memory);
+    ASSERT_EQm("Unexpected status", BF_COMPILE_UNMATCHED_BRACKET, result.status);
+    /* TODO: have row/col information? */
 
     PASS();
 }
@@ -420,6 +433,7 @@ SUITE(compile_suite) {
     RUN_TEST(compiles_branch_instructions);
     RUN_TEST(compiles_nested_branches);
     RUN_TEST(errors_on_unmatched_brackets);
+    RUN_TEST(errors_on_open_bracket);
 }
 
 

@@ -210,12 +210,9 @@ bf_compile_result bf_compile(const char *source, uint8_t *space) {
                 current_loop++;
                 assert(current_loop >= 0);
 
-                /* Crash if the nesting depth is too deep. */
+                /* Give up if the nesting depth is too deep. */
                 if (current_loop >= MAX_NESTING_DEPTH) {
-                    return (bf_compile_result) {
-                        .status = BF_COMPILE_NESTING_TOO_DEEP,
-                        .program = NULL
-                    };
+                    return error_status(BF_COMPILE_NESTING_TOO_DEEP);
                 }
 
                 i = start_loop(space, i, &contexts[current_loop]);
@@ -243,6 +240,11 @@ bf_compile_result bf_compile(const char *source, uint8_t *space) {
     }
 
     append_snippet(function_epilogue);
+
+    /* We have at least one dangling open bracket. */
+    if (current_loop != NOT_IN_LOOP) {
+        return error_status(BF_COMPILE_UNMATCHED_BRACKET);
+    }
 
     return (bf_compile_result) {
         .status = BF_COMPILE_SUCCESS,
