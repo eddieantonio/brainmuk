@@ -1,6 +1,8 @@
 Brainmuk
 ========
 
+[![Build Status](https://travis-ci.org/eddieantonio/brainmuk.svg?branch=master)](https://travis-ci.org/eddieantonio/brainmuk)
+
 > brainfuck x86 compiler and interpreter
 
 brainmuk interprets [brainfuck][] code by compiling directly into x86
