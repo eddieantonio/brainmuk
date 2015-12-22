@@ -3,7 +3,7 @@ TOP := $(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
 LOCAL_INCLUDE_DIR := $(realpath $(TOP)include)
 
 # Special compiler flags
-CFLAGS := -std=c11 -Wall -Wextra -pedantic $(CFLAGS)
+CFLAGS := -std=c11 -Wall -pedantic $(CFLAGS)
 CPPFLAGS := -I$(LOCAL_INCLUDE_DIR) $(CPPFLAGS)
 # Create .d for each .o file.
 CPP_ADD_DEFINES = -MMD
