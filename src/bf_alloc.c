@@ -1,8 +1,11 @@
 #include <bf_alloc.h>
 
 /* So that MAP_ANONYMOUS is available on glibc. */
-#define _GNU_SOURCE
+#define _BSD_SOURCE
 #include <sys/mman.h>
+#ifndef MAP_ANONYMOUS
+#define MAP_ANONYMOUS MAP_ANON
+#endif
 
 uint8_t *allocate_executable_space(size_t size) {
     uint8_t *memory = (uint8_t*) mmap(
