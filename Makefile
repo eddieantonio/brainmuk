@@ -2,6 +2,8 @@
 TOP := $(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
 LOCAL_INCLUDE_DIR := $(realpath $(TOP)include)
 
+include pandoc-man.mk
+
 # Special compiler flags
 CFLAGS := -std=c11 -Wall -pedantic $(CFLAGS)
 CPPFLAGS := -I$(LOCAL_INCLUDE_DIR) $(CPPFLAGS)
@@ -34,7 +36,7 @@ DISTNAME = $(NAME)-$(VERSION)
 
 ### Symbolic targets ###
 
-all: $(BIN)
+all: $(BIN) brainmuk.1
 
 clean:
 	-$(RM) $(BIN) $(TESTBIN)
@@ -75,5 +77,9 @@ $(DISTNAME).tar.gz: $(SRCS) Makefile LICENSE README.md
 
 include/bf_version.h: Makefile
 	echo '#define BF_VERSION "$(VERSION)"' > $@
+
+# Ensure the footer always contains the current version.
+brainmuk.1: PANDOCFLAGS=-V 'footer: Version $(VERSION)'
+brainmuk.1: brainmuk.1.md
 
 .PHONY: all clean dist test full-test watch

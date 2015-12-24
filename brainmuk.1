@@ -1,0 +1,62 @@
+.TH "BRAINMUK" "1" "" " Version 0.2.0" "Brainmuk"
+.SH NAME
+.PP
+\f[B]brainmuk\f[] \[em] brainfuck x86 compiler and interpreter
+.SH SYNOPSIS
+.PP
+\f[B]brainmuk\f[]
+[\f[B]\-m\f[]|\f[B]\-\-universe\-size\f[]=\f[I]size\f[][k|m|g]]
+[\f[I]file\f[]]
+.PD 0
+.P
+.PD
+\f[B]brainmuk\f[] [\f[B]\-\-help\f[]|\f[B]\-\-version\f[]]
+.SH DESCRIPTION
+.PP
+\f[B]brainmuk\f[] interprets the brainfuck language by compiling source
+into x86\-64 machine code.
+Either provide a file to interpret or invoke with no arguments to start
+the read\-eval\-(maybe)print\-loop (REPL).
+.SS Options
+.TP
+.B \-h, \-\-help
+Prints brief usage information.
+.RS
+.RE
+.TP
+.B \-m \f[I]size\f[], \-\-universe\-size=\f[I]size\f[]
+The size of brainmuk\[aq]s memory, in megabytes.
+Technically, a brainfuck program should have an infinite memory;
+however, \f[B]brainmuk\f[], requests that you set the size.
+If not specified, the default size is 640 KiB, which oughta be enough
+for most purposes.
+.RS
+.PP
+Suffix \f[I]size\f[] with \f[B]m\f[] for megabytes, \f[B]g\f[] for
+gigabytes, or even \f[B]k\f[] for kilobytes.
+.RE
+.TP
+.B \-v, \-\-version
+Prints the current version number.
+.RS
+.RE
+.SH Language Variety
+.IP \[bu] 2
+Each \f[B]cell\f[] is an \f[B]unsigned 8 bit integer\f[].
+.IP \[bu] 2
+There are a \f[B]finite\f[] amount of cells (specified by the
+\f[B]\-\-universe\-size\f[] option).
+.IP \[bu] 2
+When the input operator (\f[C],\f[]) receives an \f[B]end\-of\-file\f[]
+it returns \f[B]0xFF\f[].
+0xFF is always an invalid ASCII and UTF\-8 byte, and is easy to compare.
+.SH BUGS
+.PP
+See GitHub Issues: <https://github.com/eddieantonio/brainmuk/issues>
+.SH AUTHOR
+.PP
+Eddie Antonio Santos <easantos@ualberta.ca>
+.SH COPYRIGHT
+.PP
+2015 (C) Eddie Antonio Santos.
+MIT Licensed.
