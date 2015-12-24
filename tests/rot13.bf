@@ -1,3 +1,10 @@
+#!/usr/bin/env brainmuk
+
+[
+    Obtained from:
+    https://en.wikipedia.org/wiki/Brainfuck#ROT13
+]
+
 -,+[                         Read first character and start outer character reading loop
     -[                       Skip forward if character is 0
         >>++++[>++++++++<-]  Set up divisor (32) for division loop
