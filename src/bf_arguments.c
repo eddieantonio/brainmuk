@@ -63,6 +63,7 @@ static size_t parse_size(const char *str) {
 }
 
 bf_options parse_arguments(int argc, char **argv) {
+    int option = -1;
     bf_options parameters = {
         .minimum_universe_size = 640 * 1024, /* ought to be enough for anybody. */
         .filename = NULL
@@ -89,8 +90,6 @@ bf_options parse_arguments(int argc, char **argv) {
         },
         { NULL, 0, NULL, 0 }
     };
-    int option = -1;
-
 
     while ((option = getopt_long(argc, argv, "hm:v", longopts, NULL)) != -1) {
         switch (option) {
