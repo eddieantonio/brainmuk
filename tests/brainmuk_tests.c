@@ -25,10 +25,10 @@ TEST parses_unsuffixed_minimum_size() {
             MIBIBYTES(128), options.minimum_universe_size, "%lu");
 
     options = parse_arguments(2, (char *[]) {
-            "brainmuk", "--minimum-universe=128", NULL
+            "brainmuk", "--universe-size=128", NULL
     });
 
-    ASSERT_EQ_FMTm("--minimum-universe=128",
+    ASSERT_EQ_FMTm("--universe-size=128",
             MIBIBYTES(128), options.minimum_universe_size, "%lu");
 
     PASS();
@@ -43,10 +43,10 @@ TEST parses_suffixed_minimum_size() {
             GIBIBYTES(4), options.minimum_universe_size, "%lu");
 
     options = parse_arguments(2, (char *[]) {
-            "brainmuk", "--minimum-universe=64kb", NULL
+            "brainmuk", "--universe-size=64kb", NULL
     });
 
-    ASSERT_EQ_FMTm("--minimum-universe=64k",
+    ASSERT_EQ_FMTm("--universe-size=64k",
             KIBIBYTES(64), options.minimum_universe_size, "%lu");
 
     PASS();

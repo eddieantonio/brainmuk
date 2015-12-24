@@ -76,7 +76,7 @@ bf_options parse_arguments(int argc, char **argv) {
             .val = 'h',
         },
         {
-            .name = "minimum-universe",
+            .name = "universe-size",
             .has_arg = required_argument,
             .flag = NULL,
             .val = 'm',
@@ -99,7 +99,7 @@ bf_options parse_arguments(int argc, char **argv) {
                 exit(0);
                 break;
 
-            case 'm': /* --minimum-universe */
+            case 'm': /* --universe-size */
                 parameters.minimum_universe_size = parse_size(optarg);
 
                 if (parameters.minimum_universe_size == INVALID_SIZE) {
