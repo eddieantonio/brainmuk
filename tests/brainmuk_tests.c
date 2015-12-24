@@ -196,13 +196,28 @@ SUITE(allocate_executable_suite) {
 static uint8_t universe[256] = { 0 };
 static uint8_t *memory = NULL;
 
+#define OUTPUT_NOT_CALLED 0x100
+static int output = OUTPUT_NOT_CALLED;
+static void dummy_output(uint8_t octet) {
+    output = octet;
+}
+
+#define DETERMINISTIC_INPUT 42
+static uint8_t dummy_input(void) {
+    return DETERMINISTIC_INPUT;
+}
+
 /* Zeros the universe and allocates fresh executable memory. */
 static void setup_compile(void *data __attribute__ ((unused))) {
+    /* Zero the memory in the universe. */
     memset(universe, 0, sizeof(universe));
     assert(memory == NULL && "(uint_8 *) memory in unexpected state");
 
     memory = allocate_executable_space(EXEC_MEMORY_SIZE);
     assert(memory != NULL && "Failed to allocate executable space");
+
+    /* Declare output as "not called". */
+    output = OUTPUT_NOT_CALLED;
 }
 
 /* Deallocates the executable space. */
@@ -277,15 +292,7 @@ TEST compiles_address_decrement() {
     PASS();
 }
 
-#define NOT_WRITTEN 0x100
-static int output = NOT_WRITTEN;
-static void dummy_output(uint8_t octet) {
-    output = octet;
-}
-
 TEST compiles_output() {
-    output = NOT_WRITTEN;
-
     /* Shuffle the data pointer around to ensure output abides. */
     bf_compile_result result = bf_compile(">+++<>.", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
@@ -297,16 +304,12 @@ TEST compiles_output() {
         .output_byte = dummy_output,
     });
 
-    ASSERT_FALSEm("Output never called", output == NOT_WRITTEN);
+    ASSERT_FALSEm("Output never called", output == OUTPUT_NOT_CALLED);
     ASSERT_EQ_FMTm("Unexected value written", 3, output, "%d");
 
     PASS();
 }
 
-#define DETERMINISTIC_INPUT 42
-static uint8_t dummy_input(void) {
-    return DETERMINISTIC_INPUT;
-}
 
 TEST compiles_input() {
     /* Shuffle the data pointer around to ensure input abides; change its
@@ -330,8 +333,6 @@ TEST compiles_input() {
 }
 
 TEST compiles_branch_skip() {
-    output = NOT_WRITTEN;
-
     /* A branch on zero will skip what's inside. */
     bf_compile_result result = bf_compile("[,.]>+", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
@@ -346,15 +347,13 @@ TEST compiles_branch_skip() {
 
     /* Checks if either input or output were called. */
     ASSERT_FALSEm("Failed to skip input", universe[0] == DETERMINISTIC_INPUT);
-    ASSERTm("Failed to skip output", output == NOT_WRITTEN);
+    ASSERTm("Failed to skip output", output == OUTPUT_NOT_CALLED);
     ASSERT_EQ_FMTm("Failed to jump to end", 1, universe[1], "%hhu");
 
     PASS();
 }
 
 TEST compiles_branch_instructions() {
-    output = NOT_WRITTEN;
-
     /* Moves 0xFF from the first cell to the second. */
     bf_compile_result result = bf_compile("-[->+<]", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
@@ -375,8 +374,6 @@ TEST compiles_branch_instructions() {
 }
 
 TEST compiles_nested_branches() {
-    output = NOT_WRITTEN;
-
     /* Really silly; the inner "loop" outputs, and ends both loops. */
     bf_compile_result result = bf_compile("+[[.-]]", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
@@ -389,7 +386,7 @@ TEST compiles_nested_branches() {
     });
 
     /* Checks if either input or output were called. */
-    ASSERT_FALSEm("Did not call output", output == NOT_WRITTEN);
+    ASSERT_FALSEm("Did not call output", output == OUTPUT_NOT_CALLED);
     ASSERT_EQ_FMTm("Unexpected value", 0, universe[0], "%hhu");
 
     PASS();
@@ -397,11 +394,13 @@ TEST compiles_nested_branches() {
 
 TEST errors_on_unmatched_brackets() {
     bf_compile_result result = bf_compile("+]", memory);
-    ASSERT_EQm("Unexpected status", BF_COMPILE_UNMATCHED_BRACKET, result.status);
+    ASSERT_EQm("Unexpected status",
+            BF_COMPILE_UNMATCHED_BRACKET, result.status);
     /* TODO: have row/col information? */
 
     result = bf_compile("[]+]", memory);
-    ASSERT_EQm("Unexpected status", BF_COMPILE_UNMATCHED_BRACKET, result.status);
+    ASSERT_EQm("Unexpected status",
+            BF_COMPILE_UNMATCHED_BRACKET, result.status);
     /* TODO: have row/col information? */
 
     PASS();
@@ -409,11 +408,13 @@ TEST errors_on_unmatched_brackets() {
 
 TEST errors_on_open_bracket() {
     bf_compile_result result = bf_compile("[+", memory);
-    ASSERT_EQm("Unexpected status", BF_COMPILE_UNMATCHED_BRACKET, result.status);
+    ASSERT_EQm("Unexpected status",
+            BF_COMPILE_UNMATCHED_BRACKET, result.status);
     /* TODO: have row/col information? */
 
     result = bf_compile("-[+[>", memory);
-    ASSERT_EQm("Unexpected status", BF_COMPILE_UNMATCHED_BRACKET, result.status);
+    ASSERT_EQm("Unexpected status",
+            BF_COMPILE_UNMATCHED_BRACKET, result.status);
     /* TODO: have row/col information? */
 
     PASS();
