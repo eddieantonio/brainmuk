@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include <bf_alloc.h>
+#include <bf_version.h>
 #include <bf_runtime.h>
 #include <bf_arguments.h>
 #include <bf_compile.h>
@@ -65,6 +66,9 @@ static void repl(bf_options *options) {
                 "%s: warning: input is not from a terminal\n",
                 program_name);
     }
+
+    printf("brainmuk repl " BF_VERSION "\n"
+           "Press ctrl+d to exit\n");
 
     /* Prepare universe and executable space. */
     const size_t exec_mem_size = sysconf(_SC_PAGESIZE);
