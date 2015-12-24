@@ -133,7 +133,7 @@ bf_options parse_arguments(int argc, char **argv) {
 
 void usage(const char* program_name, FILE *stream) {
     fprintf(stream,
-        "Usage:\t%s [-m SIZE] file\n"
+        "Usage:\t%s [-m SIZE] [file]\n"
         "\t%s [--help|--version]\n",
         program_name, program_name);
 }
