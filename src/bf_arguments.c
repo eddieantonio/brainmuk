@@ -5,11 +5,11 @@
 #include <bf_arguments.h>
 #include <bf_version.h>
 
-static void version(const char* program_name) {
-    printf("%s " BF_VERSION "\n", program_name);
-}
-
 #define INVALID_SIZE    0
+
+static void usage(const char* program_name, FILE *stream);
+__attribute__((noreturn)) static void usage_error(const char *program_name);
+static void version(const char* program_name);
 
 /* Returns the next non-digit character or NULL. */
 static const char* parse_factor(const char *str, unsigned long *factor) {
@@ -131,7 +131,7 @@ bf_options parse_arguments(int argc, char **argv) {
     return parameters;
 }
 
-void usage(const char* program_name, FILE *stream) {
+static void usage(const char* program_name, FILE *stream) {
     fprintf(stream,
         "Usage:\t%s [-m SIZE] [file]\n"
         "\t%s [--help|--version]\n",
@@ -139,7 +139,11 @@ void usage(const char* program_name, FILE *stream) {
 }
 
 __attribute__((noreturn))
-void usage_error(const char *program_name) {
+static void usage_error(const char *program_name) {
     usage(program_name, stderr);
     exit(-1);
+}
+
+static void version(const char* program_name) {
+    printf("%s " BF_VERSION "\n", program_name);
 }

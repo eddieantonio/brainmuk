@@ -12,17 +12,6 @@ typedef struct {
     char *filename;
 } bf_options;
 
-/**
- * Prints brainmuk usage summary.
- */
-void usage(const char* program_name, FILE *stream);
-
-/**
- * Prints usage and exits with failure.
- */
-__attribute__((noreturn))
-void usage_error(const char *program_name);
-
 bf_options parse_arguments(int argc, char *argv[]);
 
 #endif /* BF_ARGUMENTS_H */
