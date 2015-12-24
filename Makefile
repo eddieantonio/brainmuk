@@ -34,9 +34,11 @@ DEPS := $(patsubst %.c,%.d,$(SRCS))
 
 DISTNAME = $(NAME)-$(VERSION)
 
+PREFIX = /usr/local
+
 ### Symbolic targets ###
 
-all: $(BIN) brainmuk.1
+all: $(BIN) $(BIN).1
 
 clean:
 	-$(RM) $(BIN) $(TESTBIN)
@@ -45,6 +47,11 @@ clean:
 	-$(RM) $(DISTNAME).tar.gz
 
 dist: $(DISTNAME).tar.gz
+
+install: $(BIN) $(BIN).1
+	mkdir -p $(PREFIX)/share/man/man1 $(PREFIX)/bin
+	cp $(BIN) $(PREFIX)/bin
+	cp $(BIN).1 $(PREFIX)/share/man/man1
 
 test: $(TESTBIN)
 	./$< $(TEST_OPTIONS)
@@ -82,4 +89,4 @@ include/bf_version.h: Makefile
 brainmuk.1: PANDOCFLAGS=-V 'footer: Version $(VERSION)'
 brainmuk.1: brainmuk.1.md
 
-.PHONY: all clean dist test full-test watch
+.PHONY: all clean dist install test full-test watch
