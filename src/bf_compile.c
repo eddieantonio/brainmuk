@@ -60,28 +60,25 @@ static const uint8_t function_epilogue[] = {
 
 static const uint8_t increment_memory[] = {
     /* (*p)++ */
-    0xfe, 0x03              // incb (%rax)
+    0xfe, 0x03              // incb (%rbx)
 };
 
 static const uint8_t decrement_memory[] = {
     /* (*p)-- */
-    0xfe, 0x0b              // decb (%rax)
+    0xfe, 0x0b              // decb (%rbx)
 };
 
 static const uint8_t increment_data_pointer[] = {
     /* (*p)++ */
-    0x48, 0xff, 0xc3        // incq %rax
+    0x48, 0xff, 0xc3        // incq %rbx
 };
 
 static const uint8_t decrement_data_pointer[] = {
     /* (*p)-- */
-    0x48, 0xff, 0xcb        // decq %rax
+    0x48, 0xff, 0xcb        // decq %rbx
 };
 
 static const uint8_t output_byte[] = {
-    /* save data pointer (%rbx) */
-    0x48, 0x89, 0x5d, 0xf8, // movq     %rbx, -0x8(%rbp)
-
     /* prepare first argument (%edi = *p). */
     0x8a, 0x13,             // movb     (%rbx), %dl
     0x0f, 0xbe, 0xfa,       // movsbl   %dl, %edi
@@ -90,21 +87,12 @@ static const uint8_t output_byte[] = {
     0x48, 0x8d, 0x45, 0x10, // leaq     0x10(%rbp), %rax
     0x48, 0x8b, 0x40, 0x08, // movq     0x8(%rax), %rax
     0xff, 0xd0,             // callq    *%rax
-
-    /* restore instruction pointer (%rbx) */
-    0x48, 0x8b, 0x5d, 0xf8, // movq     -0x8(%rbp), %rbx
 };
 
 static const uint8_t input_byte[] = {
-    /* save data pointer (%rbx) */
-    0x48, 0x89, 0x5d, 0xf8, // movq     %rbx, -0x8(%rbp)
-
     /* do indirect call to input_byte(). */
     0x48, 0x8d, 0x4d, 0x10, // leaq     0x10(%rbp), %rcx
     0xff, 0x51, 0x10,       // callq    *0x10(%rax)
-
-    /* restore instruction pointer (%rbx) */
-    0x48, 0x8b, 0x5d, 0xf8, // movq     -0x8(%rbp), %rbx
 
     /* Write the input back (returned by input_byte() in %al). */
     0x88, 0x03,             // movb     %al, (%rbx)

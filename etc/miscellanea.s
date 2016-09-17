@@ -65,9 +65,6 @@ decrement_ptr:
 
 .global call_output
 call_output:
-    # Save %rbx
-    movq    %rbx, -0x8(%rbp)
-
     # (first argument) = *p
     movb    (%rbx), %dl # %dl = *p
     movsbl  %dl, %edi
@@ -76,25 +73,17 @@ call_output:
     leaq    0x10(%rbp), %rax    # %rax = bf_runtime_context*
     movq    0x8(%rax), %rax     # %rax = output_byte*
 
+    # Call bf_runtime_context.output_byte
     callq   *%rax
-
-    # Restore %rbx
-    movq    -0x8(%rbp), %rbx
 
 .global call_input
 call_input:
-    # Save %rbx
-    movq    %rbx, -0x8(%rbp)
-
     # Do indirect call input_byte()
     movb    $0x0, %al
     leaq    0x10(%rbp), %rcx
     callq   *0x10(%rcx)
 
     # The value is returned in %al
-
-    # Restore %rbx
-    movq    -0x8(%rbp), %rbx
 
     # *p = %al
     movb    %al, (%rbx)
