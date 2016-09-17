@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -103,6 +105,8 @@ static void repl(bf_options *options) {
 static void run_program(program_t program, bf_options *options) {
     /* Allocate the ENTIRE UNIVERSE and run. */
     uint8_t *universe = calloc(options->minimum_universe_size, sizeof(uint8_t));
+
+    assert(universe != NULL);
 
     program((struct bf_runtime_context) {
             .universe = universe,
