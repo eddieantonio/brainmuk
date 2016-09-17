@@ -15,7 +15,7 @@
 #        |----------------|
 #  -0x08 | save %rbx      |
 #        |----------------|
-#   0x10 | [padding]      |
+#  -0x10 | [padding]      |
 #        |----------------|
 #
 
@@ -25,17 +25,23 @@ proper_intro:
     # Prepare our stack frame.
     pushq   %rbp
     movq    %rsp, %rbp
-    # Make some room on the stack to save %rbx
+
+    # Save %rbx on the stack.
     subq    $0x10, %rsp
+    movq    %rbx, -0x08(%rbp)
 
     # %rbx = (uint8_t *) p
-    leaq    0x10(%rbp), %rax
-    movq    (%rax), %rbx
+    leaq    0x10(%rbp), %rbx
+    # %rax = *p
+    movq    (%rbx), %rax
 
     # ...
 
 .global proper_outro
 proper_outro:
+    # Restore %rbx
+    movq    -0x08(%rbp), %rbx
+
     # Release the stack frame.
     addq    $0x10, %rsp
     popq    %rbp
@@ -100,7 +106,7 @@ loop_skeleton:
 
     # %cl = *p
     movb    (%rbx), %cl
-    
+
     # if == 0, skip...
     cmpb    $0x0, %cl
     # Placeholder is 0xFFFFFFFF

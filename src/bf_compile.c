@@ -39,6 +39,9 @@ static const uint8_t function_prologue[] = {
     /* Add 16 bytes of scratch space (need to be 16 byte-aligned). */
     0x48, 0x83, 0xec, 0x10, // subq     $0x10, %rsp
 
+    /* Save %rbx. */
+    0x48, 0x89, 0x5d, 0xf8, // movq     %rbx, -0x8(%rbp)
+
     /* $rbx = (uint8_t *) universe */
     0x48, 0x8d, 0x45, 0x10, // leaq     0x10(%rbp), %rax
     /* %rax = p */
@@ -46,6 +49,9 @@ static const uint8_t function_prologue[] = {
 };
 
 static const uint8_t function_epilogue[] = {
+    /* Restore %rbx. */
+    0x48, 0x8b, 0x5d, 0xf8, // movq	    0x8(%rbp), %rbx
+
     /* Relinquish our stack frame. */
     0x48, 0x83, 0xc4, 0x10, // addq     $0x10, %rsp
     0x5d,                   // popq     %rbp
