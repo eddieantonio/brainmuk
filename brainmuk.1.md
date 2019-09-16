@@ -8,8 +8,8 @@ NAME
 SYNOPSIS
 ========
 
-| **brainmuk** \[**-m**|**--universe-size**=*size*[k|m|g]] \[_file_]
-| **brainmuk** \[**--help**|**--version**]
+| **brainmuk** \[**-m**|**-\-universe-size**=*size*[k|m|g]] \[_file_]
+| **brainmuk** \[**-\-help**|**-\-version**]
 
 DESCRIPTION
 ===========
@@ -21,11 +21,11 @@ no arguments to start the read-eval-(maybe)print-loop (REPL).
 Options
 -------
 
--h, --help
+-h, -\-help
 
 :   Prints brief usage information.
 
--m *size*, --universe-size=*size*
+-m *size*, -\-universe-size=*size*
 
 :   The size of brainmuk's memory, in megabytes. Technically,
     a brainfuck program should have an infinite memory; however,
@@ -35,7 +35,7 @@ Options
     Suffix *size* with **m** for megabytes, **g** for gigabytes, or even
     **k** for kilobytes.
 
--v, --version
+-v, -\-version
 
 :   Prints the current version number.
 
@@ -44,7 +44,7 @@ Language Variety
 
  - Each **cell** is an **unsigned 8 bit integer**.
  - There are a **finite** amount of cells (specified by the
-   **--universe-size** option).
+   **-\-universe-size** option).
  - When the input operator (`,`) receives an **end-of-file** it returns
    **0xFF**. 0xFF is always an invalid ASCII and UTF-8 byte, and is easy
    to compare.
@@ -62,4 +62,4 @@ Eddie Antonio Santos <easantos@ualberta.ca>
 COPYRIGHT
 =========
 
-2015 (C) Eddie Antonio Santos. MIT Licensed.
+2015, 2019 (C) Eddie Antonio Santos. MIT Licensed.

@@ -1,1 +1,1 @@
-#define BF_VERSION "0.2.2"
+#define BF_VERSION "0.3.0"
