@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include <bf_compile.h>
 
@@ -12,6 +13,11 @@
  * We're not in any loop!
  */
 #define NOT_IN_LOOP         -1
+
+/**
+ * (for bf_program_text) the allocation is of an unknown size.
+ */
+#define INDETERMINATE_SPACE 0
 
 /* Context for outputing a loop. */
 struct loop_context {
@@ -173,14 +179,34 @@ static bf_compile_result error_status(enum bf_compile_status status) {
     };
 }
 
+typedef struct program_text_t {
+    /**
+     * Where the program text (i.e., machine code) can be dumped to.
+     * This is assumed to a contiguous span of pages with read, write, and
+     * execute permissions.
+     */
+    uint8_t *space;
+
+    /**
+     * How large the space is.
+     */
+    size_t allocated_space;
+
+    /**
+     * Should bf_compile_realloc() reallocate the space when needed?
+     */
+    const bool should_resize;
+} bf_program_text;
+
 /*
- * Note: the input to compile MUST be null-terminated!
+ * Note: the input to bf_compile() MUST be null-terminated!
  */
-bf_compile_result bf_compile(const char *source, uint8_t *space) {
-    size_t i = 0;
+bf_compile_result bf_compile_realloc(const char *source, bf_program_text* text) {
+    size_t i = 0;  // position in memory, relative to page start.
     int current_loop = NOT_IN_LOOP;
     struct loop_context contexts[MAX_NESTING_DEPTH];
     const char *current_instruction = source;
+    uint8_t *space = text->space;
 
     /* TODO: deal with max size. */
 
@@ -244,4 +270,17 @@ bf_compile_result bf_compile(const char *source, uint8_t *space) {
         .status = BF_COMPILE_SUCCESS,
         .program = (program_t) space
     };
+}
+
+/**
+ * Like bf_compile_realloc(), but the the program text is preallocated, and
+ * will never change its size.
+ */
+bf_compile_result bf_compile(const char *source, uint8_t *space) {
+    bf_program_text text = (bf_program_text) {
+        .space = space,
+        .allocated_space = INDETERMINATE_SPACE,
+        .should_resize = false,
+    };
+    return bf_compile_realloc(source, &text);
 }
