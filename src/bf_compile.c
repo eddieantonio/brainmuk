@@ -285,7 +285,8 @@ bf_compile_result bf_compile_realloc(const char *source, bf_program_text * restr
 
     return (bf_compile_result) {
         .status = BF_COMPILE_SUCCESS,
-        .program = (program_t) space
+        .program = (program_t) space,
+        .program_size = text->allocated_space
     };
 }
 

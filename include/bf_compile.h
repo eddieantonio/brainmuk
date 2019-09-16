@@ -50,7 +50,10 @@ typedef struct {
 
     union {
         /** The compiled program as result of compilation. */
-        program_t program;
+        struct {
+            program_t program;
+            size_t program_size;
+        };
 
         /** The location of an error. */
         struct {
@@ -58,6 +61,7 @@ typedef struct {
             unsigned long err_col;
         };
     };
+
 } bf_compile_result;
 
 

@@ -127,22 +127,18 @@ static void run_file(bf_options *options) {
         perror(NULL);
         exit(-1);
     }
-    const size_t exec_mem_size = sysconf(_SC_PAGESIZE);
-
-    /* Get space for the stuff. */
-    uint8_t *exec_mem = allocate_executable_space(exec_mem_size);
 
     /* Compile and forget the source. */
-    bf_compile_result compilation = bf_compile_no_alloc(contents, exec_mem);
+    bf_compile_result compilation = bf_compile(contents);
     unslurp(contents);
 
     if (compilation.status == BF_COMPILE_SUCCESS) {
         run_program(compilation.program, options);
+        free_executable_space((void *) compilation.program, compilation.program_size);
     } else {
         fprintf(stderr, "%s: %s: compilation failed!\n",
                 program_name, options->filename);
     }
 
-    free_executable_space(exec_mem, exec_mem_size);
     exit(compilation.status);
 }

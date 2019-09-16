@@ -465,6 +465,8 @@ TEST compiles_programs() {
     ASSERT_FALSEm("Output never called", output == OUTPUT_NOT_CALLED);
     ASSERT_EQ_FMTm("Unexected value written", 'A', output, "%d");
 
+    free_executable_space((void *) result.program, result.program_size);
+
     PASS();   
 }
 
