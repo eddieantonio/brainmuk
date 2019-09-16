@@ -179,25 +179,6 @@ static bf_compile_result error_status(enum bf_compile_status status) {
     };
 }
 
-typedef struct program_text_t {
-    /**
-     * Where the program text (i.e., machine code) can be dumped to.
-     * This is assumed to a contiguous span of pages with read, write, and
-     * execute permissions.
-     */
-    uint8_t *space;
-
-    /**
-     * How large the space is.
-     */
-    size_t allocated_space;
-
-    /**
-     * Should bf_compile_realloc() reallocate the space when needed?
-     */
-    const bool should_resize;
-} bf_program_text;
-
 /*
  * Note: the input to bf_compile() MUST be null-terminated!
  */

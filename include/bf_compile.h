@@ -8,6 +8,8 @@
 
 #include <stdint.h>
 
+#include <bf_alloc.h>
+
 enum bf_compile_status {
     /** Compilation was successful. */
     BF_COMPILE_SUCCESS = 0,
@@ -62,11 +64,21 @@ typedef struct {
  * Compiles the null-terminated source text to the given space.
  * When this function returns BF_COMPILE_SUCCES
  *
- * @param char[]    null-terminated programm source text
+ * @param char[]    null-terminated program source text
  * @param program_t freshly-created program space
  *
  * @return the compilation status.
  */
 bf_compile_result bf_compile(const char *source, uint8_t *space);
+
+/**
+ * Like bf_compile(), but allows for the reallocation of the program text.
+ *
+ * @param char[]          null-terminated program source text
+ * @param bf_program_text program text that may be resized during compilation
+ *
+ * @return the compilation status.
+ */
+bf_compile_result bf_compile_realloc(const char *source, bf_program_text *text);
 
 #endif /* BF_COMPILE_H */
