@@ -411,6 +411,20 @@ TEST errors_on_unmatched_brackets() {
     PASS();
 }
 
+TEST errors_on_open_bracket() {
+    bf_compile_result result = bf_compile_no_alloc("[+", memory);
+    ASSERT_EQm("Unexpected status",
+            BF_COMPILE_UNMATCHED_BRACKET, result.status);
+    /* TODO: have row/col information? */
+
+    result = bf_compile_no_alloc("-[+[>", memory);
+    ASSERT_EQm("Unexpected status",
+            BF_COMPILE_UNMATCHED_BRACKET, result.status);
+    /* TODO: have row/col information? */
+
+    PASS();
+}
+
 TEST compiles_programs_larger_than_one_page() {
     /* To create this, lets allocate repeat a small program at least 1.5 times
      * the size of a single page. */
@@ -440,18 +454,18 @@ TEST compiles_programs_larger_than_one_page() {
     PASS();
 }
 
-TEST errors_on_open_bracket() {
-    bf_compile_result result = bf_compile_no_alloc("[+", memory);
-    ASSERT_EQm("Unexpected status",
-            BF_COMPILE_UNMATCHED_BRACKET, result.status);
-    /* TODO: have row/col information? */
+TEST compiles_programs() {
+    bf_compile_result result = bf_compile(">++++++++[<++++++++>-]<+.");
+    ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
 
-    result = bf_compile_no_alloc("-[+[>", memory);
-    ASSERT_EQm("Unexpected status",
-            BF_COMPILE_UNMATCHED_BRACKET, result.status);
-    /* TODO: have row/col information? */
+    result.program({
+        .universe = universe,
+        .output_byte = dummy_output,
+    });
+    ASSERT_FALSEm("Output never called", output == OUTPUT_NOT_CALLED);
+    ASSERT_EQ_FMTm("Unexected value written", 'A', output, "%d");
 
-    PASS();
+    PASS();   
 }
 
 SUITE(compile_suite) {
@@ -470,6 +484,7 @@ SUITE(compile_suite) {
     RUN_TEST(errors_on_unmatched_brackets);
     RUN_TEST(errors_on_open_bracket);
     RUN_TEST(compiles_programs_larger_than_one_page);
+    RUN_TEST(compiles_programs);
 }
 
 
