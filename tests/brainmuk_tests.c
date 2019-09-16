@@ -458,7 +458,7 @@ TEST compiles_programs() {
     bf_compile_result result = bf_compile(">++++++++[<++++++++>-]<+.");
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
 
-    result.program({
+    result.program((struct bf_runtime_context) {
         .universe = universe,
         .output_byte = dummy_output,
     });

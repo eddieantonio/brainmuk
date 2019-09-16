@@ -60,6 +60,20 @@ typedef struct {
     };
 } bf_compile_result;
 
+
+/**
+ * Compiles the null-terminated source text.
+ * This function returns BF_COMPILE_SUCCESS when you can run the program.
+ *
+ * Note: you MUST free_executable_space() on bf_result->source after running
+ * the program.
+ *
+ * @param char[]    null-terminated program source text
+ *
+ * @return the compilation.
+ */
+bf_compile_result bf_compile(const char *source);
+
 /**
  * Compiles the null-terminated source text to the given space.
  * When this function returns BF_COMPILE_SUCCES
