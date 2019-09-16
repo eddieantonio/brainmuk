@@ -415,11 +415,14 @@ TEST compiles_programs_larger_than_one_page() {
     // Just output. A lot.
     memset(source, '.', program_size - 1);
 
-    bf_compile_result result = bf_compile(source, memory);
-    ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
+    bf_program_text text = (bf_program_text) {
+        .space = memory,
+        .allocated_space = getpagesize(),
+        .should_resize = true
+    };
 
-    ASSERT_EQm("Unexpected start address",
-            (uint8_t *) result.program, memory);
+    bf_compile_result result = bf_compile_realloc(source, &text);
+    ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
 
     result.program((struct bf_runtime_context) {
         .universe = universe,

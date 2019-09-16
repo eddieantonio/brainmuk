@@ -79,6 +79,6 @@ bf_compile_result bf_compile(const char *source, uint8_t *space);
  *
  * @return the compilation status.
  */
-bf_compile_result bf_compile_realloc(const char *source, bf_program_text *text);
+bf_compile_result bf_compile_realloc(const char *source, bf_program_text * restrict text);
 
 #endif /* BF_COMPILE_H */

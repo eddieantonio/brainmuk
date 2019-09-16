@@ -1,7 +1,8 @@
-#include <stddef.h>
-#include <string.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <bf_compile.h>
 
@@ -182,18 +183,34 @@ static bf_compile_result error_status(enum bf_compile_status status) {
 /*
  * Note: the input to bf_compile() MUST be null-terminated!
  */
-bf_compile_result bf_compile_realloc(const char *source, bf_program_text* text) {
+bf_compile_result bf_compile_realloc(const char *source, bf_program_text * restrict text) {
     size_t i = 0;  // position in memory, relative to page start.
     int current_loop = NOT_IN_LOOP;
     struct loop_context contexts[MAX_NESTING_DEPTH];
     const char *current_instruction = source;
     uint8_t *space = text->space;
+    size_t half_capacity = text->allocated_space / 2;
 
     /* TODO: deal with max size. */
 
     append_snippet(function_prologue);
 
     while (*current_instruction != '\0') {
+
+        /* Resize if we're getting too big. */
+        if (text->should_resize && i >= half_capacity) {
+            size_t new_capacity = 4 * text->allocated_space;
+            uint8_t *new_space = allocate_executable_space(new_capacity);
+            if (new_space == NULL) {
+                abort();
+            }
+            memcpy(new_space, space, i);
+            free_executable_space(space, text->allocated_space);
+            space = text->space = new_space;
+            text->allocated_space = new_capacity;
+            half_capacity = new_capacity / 2;
+        }
+
         switch (*current_instruction) {
             case '+':
                 append_snippet(increment_memory);
