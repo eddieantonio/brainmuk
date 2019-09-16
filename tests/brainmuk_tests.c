@@ -406,6 +406,32 @@ TEST errors_on_unmatched_brackets() {
     PASS();
 }
 
+TEST compiles_programs_larger_than_one_page() {
+    /* To create this, lets allocate repeat a small program at least 1.5 times
+     * the size of a single page. */
+    size_t program_size = getpagesize() + getpagesize()/ 2;
+    char *source = calloc(1, program_size);
+    ASSERT(source != NULL);
+    // Just output. A lot.
+    memset(source, '.', program_size - 1);
+
+    bf_compile_result result = bf_compile(source, memory);
+    ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
+
+    ASSERT_EQm("Unexpected start address",
+            (uint8_t *) result.program, memory);
+
+    result.program((struct bf_runtime_context) {
+        .universe = universe,
+        .output_byte = dummy_output,
+    });
+
+    /* Checks if either input or output were called. */
+    ASSERT_FALSEm("Did not call output", output == OUTPUT_NOT_CALLED);
+
+    PASS();
+}
+
 TEST errors_on_open_bracket() {
     bf_compile_result result = bf_compile("[+", memory);
     ASSERT_EQm("Unexpected status",
@@ -435,6 +461,7 @@ SUITE(compile_suite) {
     RUN_TEST(compiles_nested_branches);
     RUN_TEST(errors_on_unmatched_brackets);
     RUN_TEST(errors_on_open_bracket);
+    RUN_TEST(compiles_programs_larger_than_one_page);
 }
 
 
