@@ -274,7 +274,7 @@ bf_compile_result bf_compile_realloc(const char *source, bf_program_text * restr
  * Like bf_compile_realloc(), but the the program text is preallocated, and
  * will never change its size.
  */
-bf_compile_result bf_compile(const char *source, uint8_t *space) {
+bf_compile_result bf_compile_no_alloc(const char *source, uint8_t *space) {
     bf_program_text text = (bf_program_text) {
         .space = space,
         .allocated_space = INDETERMINATE_SPACE,

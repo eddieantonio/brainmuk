@@ -233,7 +233,7 @@ static void teardown_compile(void *data __attribute__ ((unused))) {
 }
 
 TEST compiles_simple_addition() {
-    bf_compile_result result = bf_compile("+", memory);
+    bf_compile_result result = bf_compile_no_alloc("+", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
     ASSERT_EQm("Unexpected start address",
             (uint8_t *) result.program, memory);
@@ -250,7 +250,7 @@ TEST compiles_simple_addition() {
 }
 
 TEST compiles_simple_subtraction() {
-    bf_compile_result result = bf_compile("-", memory);
+    bf_compile_result result = bf_compile_no_alloc("-", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
     ASSERT_EQm("Unexpected start address",
             (uint8_t *) result.program, memory);
@@ -265,7 +265,7 @@ TEST compiles_simple_subtraction() {
 }
 
 TEST compiles_address_increment() {
-    bf_compile_result result = bf_compile(">+", memory);
+    bf_compile_result result = bf_compile_no_alloc(">+", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
     ASSERT_EQm("Unexpected start address",
             (uint8_t *) result.program, memory);
@@ -281,7 +281,7 @@ TEST compiles_address_increment() {
 }
 
 TEST compiles_address_decrement() {
-    bf_compile_result result = bf_compile("<+", memory);
+    bf_compile_result result = bf_compile_no_alloc("<+", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
     ASSERT_EQm("Unexpected start address",
             (uint8_t *) result.program, memory);
@@ -299,7 +299,7 @@ TEST compiles_address_decrement() {
 
 TEST compiles_output() {
     /* Shuffle the data pointer around to ensure output abides. */
-    bf_compile_result result = bf_compile(">+++<>.", memory);
+    bf_compile_result result = bf_compile_no_alloc(">+++<>.", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
     ASSERT_EQm("Unexpected start address",
             (uint8_t *) result.program, memory);
@@ -319,7 +319,7 @@ TEST compiles_output() {
 TEST compiles_input() {
     /* Shuffle the data pointer around to ensure input abides; change its
      * data too to check if input actually worked... */
-    bf_compile_result result = bf_compile(">+++<>,", memory);
+    bf_compile_result result = bf_compile_no_alloc(">+++<>,", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
     ASSERT_EQm("Unexpected start address",
             (uint8_t *) result.program, memory);
@@ -339,7 +339,7 @@ TEST compiles_input() {
 
 TEST compiles_branch_skip() {
     /* A branch on zero will skip what's inside. */
-    bf_compile_result result = bf_compile("[,.]>+", memory);
+    bf_compile_result result = bf_compile_no_alloc("[,.]>+", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
     ASSERT_EQm("Unexpected start address",
             (uint8_t *) result.program, memory);
@@ -360,7 +360,7 @@ TEST compiles_branch_skip() {
 
 TEST compiles_branch_instructions() {
     /* Moves 0xFF from the first cell to the second. */
-    bf_compile_result result = bf_compile("-[->+<]", memory);
+    bf_compile_result result = bf_compile_no_alloc("-[->+<]", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
     ASSERT_EQm("Unexpected start address",
             (uint8_t *) result.program, memory);
@@ -380,7 +380,7 @@ TEST compiles_branch_instructions() {
 
 TEST compiles_nested_branches() {
     /* Really silly; the inner "loop" outputs, and ends both loops. */
-    bf_compile_result result = bf_compile("+[[.-]]", memory);
+    bf_compile_result result = bf_compile_no_alloc("+[[.-]]", memory);
     ASSERT_EQm("Failed to compile", result.status, BF_COMPILE_SUCCESS);
     ASSERT_EQm("Unexpected start address",
             (uint8_t *) result.program, memory);
@@ -398,12 +398,12 @@ TEST compiles_nested_branches() {
 }
 
 TEST errors_on_unmatched_brackets() {
-    bf_compile_result result = bf_compile("+]", memory);
+    bf_compile_result result = bf_compile_no_alloc("+]", memory);
     ASSERT_EQm("Unexpected status",
             BF_COMPILE_UNMATCHED_BRACKET, result.status);
     /* TODO: have row/col information? */
 
-    result = bf_compile("[]+]", memory);
+    result = bf_compile_no_alloc("[]+]", memory);
     ASSERT_EQm("Unexpected status",
             BF_COMPILE_UNMATCHED_BRACKET, result.status);
     /* TODO: have row/col information? */
@@ -441,12 +441,12 @@ TEST compiles_programs_larger_than_one_page() {
 }
 
 TEST errors_on_open_bracket() {
-    bf_compile_result result = bf_compile("[+", memory);
+    bf_compile_result result = bf_compile_no_alloc("[+", memory);
     ASSERT_EQm("Unexpected status",
             BF_COMPILE_UNMATCHED_BRACKET, result.status);
     /* TODO: have row/col information? */
 
-    result = bf_compile("-[+[>", memory);
+    result = bf_compile_no_alloc("-[+[>", memory);
     ASSERT_EQm("Unexpected status",
             BF_COMPILE_UNMATCHED_BRACKET, result.status);
     /* TODO: have row/col information? */

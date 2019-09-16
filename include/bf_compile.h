@@ -69,10 +69,10 @@ typedef struct {
  *
  * @return the compilation status.
  */
-bf_compile_result bf_compile(const char *source, uint8_t *space);
+bf_compile_result bf_compile_no_alloc(const char *source, uint8_t *space);
 
 /**
- * Like bf_compile(), but allows for the reallocation of the program text.
+ * Like bf_compile_no_alloc(), but allows for the reallocation of the program text.
  *
  * @param char[]          null-terminated program source text
  * @param bf_program_text program text that may be resized during compilation

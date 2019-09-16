@@ -86,7 +86,7 @@ static void repl(bf_options *options) {
         }
 
         /* Eval. */
-        bf_compile_result result = bf_compile(line, exec_mem);
+        bf_compile_result result = bf_compile_no_alloc(line, exec_mem);
 
         if (result.status != BF_COMPILE_SUCCESS) {
             fprintf(stderr, "compile error (check brackets?)\n");
@@ -133,7 +133,7 @@ static void run_file(bf_options *options) {
     uint8_t *exec_mem = allocate_executable_space(exec_mem_size);
 
     /* Compile and forget the source. */
-    bf_compile_result compilation = bf_compile(contents, exec_mem);
+    bf_compile_result compilation = bf_compile_no_alloc(contents, exec_mem);
     unslurp(contents);
 
     if (compilation.status == BF_COMPILE_SUCCESS) {
