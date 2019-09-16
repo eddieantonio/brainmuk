@@ -195,6 +195,7 @@ SUITE(allocate_executable_suite) {
 #define EXEC_MEMORY_SIZE (sysconf(_SC_PAGESIZE) - 1)
 static uint8_t universe[256] = { 0 };
 static uint8_t *memory = NULL;
+static size_t page_size = 0;
 
 #define OUTPUT_NOT_CALLED 0x100
 static int output = OUTPUT_NOT_CALLED;
@@ -218,6 +219,10 @@ static void setup_compile(void *data __attribute__ ((unused))) {
 
     /* Declare output as "not called". */
     output = OUTPUT_NOT_CALLED;
+
+    /* How big pages on this system, in bytes. */
+    page_size = sysconf(_SC_PAGESIZE);
+    assert(page_size > 0);
 }
 
 /* Deallocates the executable space. */
@@ -409,7 +414,7 @@ TEST errors_on_unmatched_brackets() {
 TEST compiles_programs_larger_than_one_page() {
     /* To create this, lets allocate repeat a small program at least 1.5 times
      * the size of a single page. */
-    size_t program_size = getpagesize() + getpagesize()/ 2;
+    size_t program_size = page_size + page_size / 2;
     char *source = calloc(1, program_size);
     ASSERT(source != NULL);
     // Just output. A lot.
@@ -417,7 +422,7 @@ TEST compiles_programs_larger_than_one_page() {
 
     bf_program_text text = (bf_program_text) {
         .space = memory,
-        .allocated_space = getpagesize(),
+        .allocated_space = page_size,
         .should_resize = true
     };
 
